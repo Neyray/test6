@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约记录管理 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --status-pending: #ff9800;
+            --status-confirmed: #2196f3;
+            --status-completed: #4caf50;
+            --status-cancelled: #f44336;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+
+        
+        /* 数据表格样式 */
+        .table-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+        
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .records-table th {
+            background-color: #f8f9ff;
+            color: var(--text-gray);
+            font-weight: 600;
+            text-align: left;
+            padding: 15px 20px;
+            border-bottom: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .records-table th:hover {
+            background-color: #f0f3ff;
+        }
+        
+        .records-table th.sorted-asc::after {
+            content: ' \2191';
+            font-size: 0.9rem;
+        }
+        
+        .records-table th.sorted-desc::after {
+            content: ' \2193';
+            font-size: 0.9rem;
+        }
+        
+        .records-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            transition: var(--transition);
+        }
+        
+        .records-table tr:hover td {
+            background-color: #f8f9ff;
+        }
+        
+        .status-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: rgba(255, 152, 0, 0.15);
+            color: var(--status-pending);
+        }
+        
+        .status-confirmed {
+            background: rgba(33, 150, 243, 0.15);
+            color: var(--status-confirmed);
+        }
+        
+        .status-completed {
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--status-completed);
+        }
+        
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.15);
+            color: var(--status-cancelled);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: #f0f3ff;
+            color: #667eea;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .edit-btn:hover {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+        
+        .cancel-btn:hover {
+            background: #ffebee;
+            color: #f44336;
+        }
+        
+        .view-btn:hover {
+            background: #e1f5fe;
+            color: #03a9f4;
+        }
+        
+        /* 数据汇总卡片 */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .summary-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .summary-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-dark);
+        }
+        
+        .summary-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0.5rem 0;
+        }
+        
+        .summary-card .description {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+        
+        /* 卡片视图（移动端） */
+        .records-cards {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .record-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .card-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 1.2rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-weight: 500;
+        }
+        
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 1rem;
+        }
+        
+        .card-action-btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f8f9ff;
+            border: 1px solid #e0e0e0;
+            color: #667eea;
+        }
+        
+        .card-action-btn:hover {
+            background: #f0f3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        /* 刷新按钮样式 */
+        #refreshBtn:hover {
+            transform: translateY(-2px) rotate(180deg);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .records-table {
+                display: none;
+            }
+            
+            .records-cards {
+                display: grid;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .records-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="providerHome.html">服务商中心</a></li>
+                    <li><a href="providerCreate.html">发布预约</a></li>
+                    <li><a href="providerRecords.html" class="active">预约记录</a></li>
+                    <li><a href="providerProfile.html">服务商资料</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>医</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="providerProfile.html"><i class="fas fa-user-md"></i> 服务商资料</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="dashboard-container">
+        <!-- 数据汇总卡片 -->
+        <section class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3>总预约数</h3>
+                <div class="number">128</div>
+                <p class="description">所有状态预约总数</p>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <h3>总收入</h3>
+                <div class="number">¥42,680</div>
+                <p class="description">已完成预约总收入</p>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3>平均评分</h3>
+                <div class="number">4.8</div>
+                <p class="description">客户评价平均分</p>
+            </div>
+        </section>
+        
+        <!-- 表格区域 -->
+        <section class="table-section">
+            <div class="section-header">
+                <h2>预约记录管理</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="refreshBtn" onclick="refreshData()" title="刷新数据" style="background: var(--primary-gradient); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition);">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索服务名称..." style="padding: 10px 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                    </div>
+                </div>
+            </div>
+            
+            <table class="records-table" id="recordsTable">
+                <thead>
+                    <tr>
+                        <th data-sort="serviceName">服务名称 <i class="fas fa-sort"></i></th>
+                        <th data-sort="date">日期 <i class="fas fa-sort"></i></th>
+                        <th data-sort="status">状态 <i class="fas fa-sort"></i></th>
+                        <th data-sort="income">收入 <i class="fas fa-sort"></i></th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>健康体检套餐</td>
+                        <td>2025-06-25 10:30</td>
+                        <td>
+                            <div class="status-cell">
+                                <span class="status-badge status-completed">已完成</span>
+                            </div>
+                        </td>
+                        <td>¥880</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn cancel-btn" title="取消预约">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="action-btn view-btn" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>牙科检查</td>
+                        <td>2025-06-26 14:00</td>
+                        <td>
+                            <div class="status-cell">
+                                <span class="status-badge status-confirmed">已确认</span>
+                            </div>
+                        </td>
+                        <td>¥350</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn cancel-btn" title="取消预约">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="action-btn view-btn" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>心理咨询</td>
+                        <td>2025-06-27 09:00</td>
+                        <td>
+                            <div class="status-cell">
+                                <span class="status-badge status-pending">待确认</span>
+                            </div>
+                        </td>
+                        <td>¥500</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn cancel-btn" title="取消预约">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="action-btn view-btn" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>疫苗接种</td>
+                        <td>2025-06-28 11:30</td>
+                        <td>
+                            <div class="status-cell">
+                                <span class="status-badge status-cancelled">已取消</span>
+                            </div>
+                        </td>
+                        <td>¥0</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn cancel-btn" title="取消预约">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="action-btn view-btn" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>年度体检</td>
+                        <td>2025-06-29 15:45</td>
+                        <td>
+                            <div class="status-cell">
+                                <span class="status-badge status-confirmed">已确认</span>
+                            </div>
+                        </td>
+                        <td>¥1,200</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn edit-btn" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn cancel-btn" title="取消预约">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="action-btn view-btn" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 移动端卡片视图 -->
+            <div class="records-cards" id="recordsCards">
+                <div class="record-card">
+                    <div class="card-header">
+                        <div class="card-title">健康体检套餐</div>
+                        <div class="card-status status-completed">已完成</div>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <span class="detail-label">日期时间</span>
+                            <span class="detail-value">2025-06-25 10:30</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务价格</span>
+                            <span class="detail-value">¥880</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">客户姓名</span>
+                            <span class="detail-value">张先生</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务提供者</span>
+                            <span class="detail-value">李医生</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-action-btn">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="record-card">
+                    <div class="card-header">
+                        <div class="card-title">牙科检查</div>
+                        <div class="card-status status-confirmed">已确认</div>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <span class="detail-label">日期时间</span>
+                            <span class="detail-value">2025-06-26 14:00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务价格</span>
+                            <span class="detail-value">¥350</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">客户姓名</span>
+                            <span class="detail-value">王女士</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务提供者</span>
+                            <span class="detail-value">张医生</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-action-btn">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="record-card">
+                    <div class="card-header">
+                        <div class="card-title">心理咨询</div>
+                        <div class="card-status status-pending">待确认</div>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <span class="detail-label">日期时间</span>
+                            <span class="detail-value">2025-06-27 09:00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务价格</span>
+                            <span class="detail-value">¥500</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">客户姓名</span>
+                            <span class="detail-value">刘先生</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务提供者</span>
+                            <span class="detail-value">王医生</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-action-btn">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+    
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // 全局变量
+        let recordsData = [];
+        let currentSort = { column: null, direction: 'asc' };
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 表格排序功能
+            initTableSorting();
+            
+            // 初始化数据加载
+            loadAllRecords();
+            
+            // 搜索功能
+            const searchInput = document.querySelector('.search-box input');
+            searchInput.addEventListener('input', handleSearch);
+        });
+        
+        // API 1: 加载所有预约记录数据
+        async function loadAllRecords() {
+            try {
+                showLoading(true);
+                
+                // 从localStorage获取用户信息
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if(!userInfo || !userInfo.phone) {
+                    throw new Error('用户信息未找到，请先登录');
+                }
+
+                const param = new URLSearchParams();
+                param.append('phone', userInfo.phone);
+                
+                console.log('正在请求预约记录数据...');
+                const response = await fetch(`/providerRecords?${param.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('后端响应数据:', data);
+                
+                if (data.success) {
+                    // 处理成功响应
+                    recordsData = data.records || [];
+                    updateSummaryCards(data.summary || {});
+                    renderRecordsTable();
+                    renderRecordsCards();
+                    
+                    showNotification(`成功加载 ${recordsData.length} 条预约记录`, 'success');
+                } else {
+                    throw new Error(data.message || '获取数据失败');
+                }
+                
+            } catch (error) {
+                console.error('加载预约记录失败:', error);
+                showNotification('无法连接到后端服务，使用模拟数据', 'error');
+                
+                // 显示模拟数据作为备用
+                loadMockData();
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 更新汇总卡片数据
+        function updateSummaryCards(summary) {
+            const cards = document.querySelectorAll('.summary-card');
+            
+            // 更新总预约数
+            if (summary.totalRecords !== undefined) {
+                cards[0].querySelector('.number').textContent = summary.totalRecords;
+            }
+            
+            // 更新总收入
+            if (summary.totalIncome !== undefined) {
+                cards[1].querySelector('.number').textContent = `¥${summary.totalIncome.toLocaleString()}`;
+            }
+            
+            // 更新平均评分
+            if (summary.averageRating !== undefined) {
+                cards[2].querySelector('.number').textContent = summary.averageRating.toFixed(1);
+            }
+        }
+        
+        // 渲染预约记录表格
+        function renderRecordsTable() {
+            const tbody = document.querySelector('#recordsTable tbody');
+            
+            if (recordsData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-gray);">
+                            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                            暂无预约记录
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = recordsData.map(record => `
+                <tr data-record-id="${record.id}">
+                    <td>${record.serviceName}</td>
+                    <td>${formatDateTime(record.appointmentTime)}</td>
+                    <td>
+                        <div class="status-cell">
+                            <span class="status-badge ${getStatusClass(record.status)}">${getStatusText(record.status)}</span>
+                        </div>
+                    </td>
+                    <td>¥${record.price || 0}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" title="编辑" onclick="editRecord('${record.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn cancel-btn" title="取消预约" onclick="cancelRecord('${record.id}', '${record.status}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button class="action-btn view-btn" title="查看详情" onclick="viewRecord('${record.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 渲染移动端卡片视图
+        function renderRecordsCards() {
+            const cardsContainer = document.getElementById('recordsCards');
+            
+            if (recordsData.length === 0) {
+                cardsContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-gray);">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        暂无预约记录
+                    </div>
+                `;
+                return;
+            }
+            
+            cardsContainer.innerHTML = recordsData.map(record => `
+                <div class="record-card" data-record-id="${record.id}">
+                    <div class="card-header">
+                        <div class="card-title">${record.serviceName}</div>
+                        <div class="card-status ${getStatusClass(record.status)}">${getStatusText(record.status)}</div>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <span class="detail-label">日期时间</span>
+                            <span class="detail-value">${formatDateTime(record.appointmentTime)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">服务价格</span>
+                            <span class="detail-value">¥${record.price || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">客户姓名</span>
+                            <span class="detail-value">${record.customerName || '未知'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">联系电话</span>
+                            <span class="detail-value">${record.customerPhone || '未知'}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="card-action-btn" onclick="editRecord('${record.id}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="card-action-btn" onclick="cancelRecord('${record.id}', '${record.status}')">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button class="card-action-btn" onclick="viewRecord('${record.id}')">
+                            <i class="fas fa-eye"></i> 详情
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // API 2: 取消预约同步后端
+        async function cancelRecord(recordId, currentStatus) {
+            try {
+                // 如果已经是取消状态，则不允许再次取消
+                if (currentStatus === 'cancelled') {
+                    showNotification('该预约已经是取消状态', 'info');
+                    return;
+                }
+                
+                // 确认取消操作
+                if (!confirm('确定要取消这个预约吗？此操作不可撤销。')) {
+                    return;
+                }
+                
+                showLoading(true);
+                
+                // 添加验证字段
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if (!userInfo || !userInfo.phone) {
+                    throw new Error('用户信息未找到，请先登录');
+                }
+                
+                console.log(`正在取消预约记录 ${recordId}，当前状态: ${currentStatus}`);
+                
+                const response = await fetch(`/providerCancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recordId: recordId,
+                        identifier: userInfo.phone, // 使用用户手机号作为标识符
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('取消预约响应:', data);
+                
+                if (data.success) {
+                    // 更新本地数据
+                    const recordIndex = recordsData.findIndex(r => r.id === recordId);
+                    if (recordIndex !== -1) {
+                        recordsData[recordIndex].status = 'cancelled';
+                        recordsData[recordIndex].price = 0; // 取消预约后收入为0
+                        
+                        // 重新渲染界面
+                        renderRecordsTable();
+                        renderRecordsCards();
+                        
+                        showNotification('预约已成功取消', 'success');
+                    }
+                } else {
+                    throw new Error(data.message || '取消预约失败');
+                }
+                
+            } catch (error) {
+                console.error('取消预约失败:', error);
+                showNotification('取消预约失败: ' + error.message, 'error');
+                
+                // 模拟成功（仅用于演示，实际部署时应删除）
+                console.log('使用模拟取消预约...');
+                simulateCancelRecord(recordId);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 模拟取消预约（备用方案）
+        function simulateCancelRecord(recordId) {
+            const recordIndex = recordsData.findIndex(r => r.id === recordId);
+            
+            if (recordIndex !== -1) {
+                recordsData[recordIndex].status = 'cancelled';
+                recordsData[recordIndex].price = 0;
+                renderRecordsTable();
+                renderRecordsCards();
+                showNotification('模拟预约取消成功', 'success');
+            }
+        }
+        
+        // 搜索功能
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                renderRecordsTable();
+                renderRecordsCards();
+                return;
+            }
+            
+            const filteredData = recordsData.filter(record => 
+                record.serviceName.toLowerCase().includes(searchTerm) ||
+                (record.customerName && record.customerName.toLowerCase().includes(searchTerm)) ||
+                (record.customerPhone && record.customerPhone.includes(searchTerm))
+            );
+            
+            // 临时替换数据进行渲染
+            const originalData = recordsData;
+            recordsData = filteredData;
+            renderRecordsTable();
+            renderRecordsCards();
+            recordsData = originalData;
+        }
+        // 表格排序初始化
+        function initTableSorting() {
+            const table = document.getElementById('recordsTable');
+            const headers = table.querySelectorAll('th[data-sort]');
+            
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    
+                    // 移除所有排序标记
+                    headers.forEach(h => {
+                        h.classList.remove('sorted-asc', 'sorted-desc');
+                    });
+                    
+                    // 设置当前排序方向
+                    if (currentSort.column === column) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = column;
+                        currentSort.direction = 'asc';
+                    }
+                    
+                    // 添加排序标记
+                    header.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                    
+                    // 执行排序
+                    sortRecordsData(column, currentSort.direction);
+                });
+            });
+        }
+        
+        // 表格排序函数
+        function sortRecordsData(column, direction) {
+            recordsData.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (column) {
+                    case 'serviceName':
+                        valueA = a.serviceName.toLowerCase();
+                        valueB = b.serviceName.toLowerCase();
+                        break;
+                    case 'date':
+                        valueA = new Date(a.appointmentTime);
+                        valueB = new Date(b.appointmentTime);
+                        break;
+                    case 'status':
+                        valueA = getStatusOrder(a.status);
+                        valueB = getStatusOrder(b.status);
+                        break;
+                    case 'income':
+                        valueA = parseFloat(a.price) || 0;
+                        valueB = parseFloat(b.price) || 0;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (valueA < valueB) return direction === 'asc' ? -1 : 1;
+                if (valueA > valueB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            renderRecordsTable();
+            renderRecordsCards();
+        }
+        
+        // 工具函数
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'status-pending',
+                'confirmed': 'status-confirmed', 
+                'completed': 'status-completed',
+                'cancelled': 'status-cancelled'
+            };
+            return statusMap[status] || 'status-pending';
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '待确认',
+                'confirmed': '已确认',
+                'completed': '已完成', 
+                'cancelled': '已取消'
+            };
+            return statusMap[status] || '待确认';
+        }
+        
+        function getStatusOrder(status) {
+            const orderMap = {
+                'pending': 1,
+                'confirmed': 2,
+                'completed': 3,
+                'cancelled': 4
+            };
+            return orderMap[status] || 1;
+        }
+        
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '未知时间';
+            
+            try {
+                const date = new Date(dateTimeStr);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (error) {
+                return dateTimeStr;
+            }
+        }
+        
+        function showLoading(show) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (show) {
+                loadingOverlay.classList.add('active');
+            } else {
+                loadingOverlay.classList.remove('active');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // 添加样式
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 300px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 显示动画
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // 自动移除
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // 编辑记录
+        function editRecord(recordId) {
+            const record = recordsData.find(r => r.id === recordId);
+            if (!record) return;
+            
+            showNotification(`编辑记录: ${record.serviceName}`, 'info');
+            // TODO: 实现编辑功能，可以跳转到编辑页面
+        }
+        
+        // 查看记录详情
+        function viewRecord(recordId) {
+            const record = recordsData.find(r => r.id === recordId);
+            if (!record) return;
+            
+            showNotification(`查看详情: ${record.serviceName}`, 'info');
+            // TODO: 实现详情查看功能，可以显示弹窗或跳转详情页
+        }
+        
+        // 加载模拟数据（备用方案）
+        function loadMockData() {
+            recordsData = [
+                {
+                    id: '1',
+                    serviceName: '健康体检套餐',
+                    appointmentTime: '2025-06-25T10:30:00',
+                    status: 'completed',
+                    price: 880,
+                    customerName: '张先生',
+                    customerPhone: '13812345678'
+                },
+                {
+                    id: '2', 
+                    serviceName: '牙科检查',
+                    appointmentTime: '2025-06-26T14:00:00',
+                    status: 'confirmed',
+                    price: 350,
+                    customerName: '王女士',
+                    customerPhone: '13987654321'
+                },
+                {
+                    id: '3',
+                    serviceName: '心理咨询',
+                    appointmentTime: '2025-06-27T09:00:00', 
+                    status: 'pending',
+                    price: 500,
+                    customerName: '刘先生',
+                    customerPhone: '13765432189'
+                },
+                {
+                    id: '4',
+                    serviceName: '疫苗接种',
+                    appointmentTime: '2025-06-28T11:30:00',
+                    status: 'cancelled', 
+                    price: 0,
+                    customerName: '李女士',
+                    customerPhone: '13654321098'
+                },
+                {
+                    id: '5',
+                    serviceName: '年度体检',
+                    appointmentTime: '2025-06-29T15:45:00',
+                    status: 'confirmed',
+                    price: 1200,
+                    customerName: '陈先生',
+                    customerPhone: '13543210987'
+                }
+            ];
+            
+            updateSummaryCards({
+                totalRecords: recordsData.length,
+                totalIncome: recordsData.filter(r => r.status === 'completed').reduce((sum, r) => sum + r.price, 0),
+                averageRating: 4.8
+            });
+            
+            renderRecordsTable();
+            renderRecordsCards();
+        }
+        
+        // 刷新数据
+        function refreshData() {
+            loadAllRecords();
+        }
+        
+        // 暴露全局刷新函数
+        window.refreshRecordsData = refreshData;
+    </script>
+</body>
+</html>

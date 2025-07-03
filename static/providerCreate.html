@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布新预约 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --step-color: #e0e7ff;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .create-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+        }
+        
+        /* 步骤指示器 */
+        .steps-container {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        
+        .steps-progress {
+            position: absolute;
+            top: 28px;
+            left: 0;
+            height: 4px;
+            background: #e0e0e0;
+            width: 100%;
+            z-index: 1;
+        }
+        
+        .steps-progress-bar {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0%;
+            transition: var(--transition);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 25%;
+        }
+        
+        .step-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--step-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+            color: var(--text-gray);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .step.active .step-icon {
+            background: var(--primary-gradient);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step.completed .step-icon {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .step.completed .step-icon::after {
+            content: "\f00c";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+        }
+        
+        .step-text {
+            text-align: center;
+            font-weight: 500;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+        
+        .step.active .step-text {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        /* 表单区域 */
+        .form-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            margin-bottom: 1.8rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .section-header p {
+            color: var(--text-gray);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* 图片上传容器 */
+        .image-upload-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .clear-image-btn {
+            padding: 8px 15px;
+            background: #ffebee;
+            border: 1px solid #f44336;
+            border-radius: 6px;
+            color: #f44336;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            align-self: flex-start;
+        }
+        
+        .clear-image-btn:hover {
+            background: #f44336;
+            color: white;
+        }
+        
+        /* 时间槽管理 */
+        .time-slots {
+            margin-top: 1.5rem;
+        }
+        
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .add-slot-btn {
+            padding: 8px 15px;
+            background: #f0f3ff;
+            border: none;
+            border-radius: 8px;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .add-slot-btn:hover {
+            background: #e0e7ff;
+        }
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .slot-card {
+            background: #f9f9ff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .slot-time {
+            font-weight: 600;
+        }
+        
+        .slot-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .slot-action {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .slot-action.edit {
+            background: #e0e7ff;
+            color: #667eea;
+        }
+        
+        .slot-action.delete {
+            background: #ffebee;
+            color: #f44336;
+        }
+        
+        .slot-action:hover {
+            transform: scale(1.1);
+        }
+        
+        /* 价格设置 */
+        .pricing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 1.5rem;
+        }
+        
+        .pricing-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .pricing-card:hover {
+            border-color: #667eea;
+            box-shadow: var(--shadow);
+        }
+        
+        .pricing-card.selected {
+            border: 2px solid #667eea;
+            background: #f8f9ff;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        .pricing-card .price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0.5rem 0;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        
+        .pricing-card li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--text-gray);
+        }
+        
+        .pricing-card li i {
+            color: #4caf50;
+        }
+        
+        /* 表单导航按钮 */
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+        
+        .nav-btn.prev {
+            background: #f0f3ff;
+            color: #667eea;
+        }
+        
+        .nav-btn.next {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .nav-btn.submit {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 预览面板 */
+        .preview-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .panel-header h2 {
+            font-size: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .preview-content {
+            padding: 1rem 0;
+        }
+        
+        .preview-item {
+            margin-bottom: 1.2rem;
+        }
+        
+        .preview-item h3 {
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+        
+        .preview-item p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            word-break: break-word;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .preview-image .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .preview-image .placeholder i {
+            font-size: 2rem;
+            color: #ccc;
+        }
+        
+        .time-slots-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .time-slot-badge {
+            padding: 6px 12px;
+            background: #f0f3ff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #667eea;
+        }
+        
+        /* 草稿管理 */
+        .draft-manager {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .draft-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .draft-header h2 {
+            font-size: 1.3rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .draft-controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .draft-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .draft-btn.save {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .draft-btn.load {
+            background: #f0f3ff;
+            color: #667eea;
+        }
+        
+        .draft-btn.delete {
+            border-color: #f44336;
+            color: #f44336;
+        }
+        
+        .draft-btn.delete:hover {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .draft-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .draft-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .create-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .preview-panel {
+                position: relative;
+                top: 0;
+                margin-top: 2rem;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .steps {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .step {
+                width: 45%;
+            }
+            
+            .steps-progress {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .step {
+                width: 100%;
+                align-items: flex-start;
+                flex-direction: row;
+                gap: 15px;
+            }
+            
+            .step-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .draft-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .draft-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="providerHome.html">服务商中心</a></li>
+                    <li><a href="providerCreate.html" class="active">发布预约</a></li>
+                    <li><a href="providerRecords.html">预约记录</a></li>
+                    <li><a href="providerProfile.html">服务商资料</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>医</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="providerProfile.html"><i class="fas fa-user-md"></i> 服务商资料</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="create-container">
+        <!-- 表单区域 -->
+        <div class="form-content">
+            <!-- 步骤指示器 -->
+            <div class="steps-container">
+                <div class="steps-progress">
+                    <div class="steps-progress-bar" id="progressBar"></div>
+                </div>
+                <div class="steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="step-text">服务信息</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="step-text">时间设置</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="step-text">定价策略</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="step-text">预览与提交</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 表单部分 -->
+            <div class="form-container">
+                <!-- 步骤1: 服务信息 -->
+                <div class="form-section active" id="section1">
+                    <div class="section-header">
+                        <h2>服务基本信息</h2>
+                        <p>填写您的服务名称、分类和详细描述</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="serviceName"><i class="fas fa-tag"></i> 服务名称</label>
+                            <input type="text" id="serviceName" placeholder="例如：高级健康体检套餐">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="serviceCategory"><i class="fas fa-list"></i> 服务分类</label>
+                            <select id="serviceCategory">
+                                <option value="">选择分类</option>
+                                <option value="医疗">医疗服务</option>
+                                <option value="美容">美容服务</option>
+                                <option value="健身">健身服务</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="serviceProvider"><i class="fas fa-user-md"></i> 服务提供者</label>
+                            <input type="text" id="serviceProvider" placeholder="请输入服务提供者姓名">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="serviceImage"><i class="fas fa-image"></i> 服务图片</label>
+                            <div class="image-upload-container">
+                                <input type="file" id="serviceImage" accept="image/*">
+                                <button type="button" class="clear-image-btn" onclick="clearImage()" style="display: none;">
+                                    <i class="fas fa-times"></i> 清除图片
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="serviceDescription"><i class="fas fa-align-left"></i> 服务描述</label>
+                        <textarea id="serviceDescription" placeholder="详细描述您的服务内容、流程和注意事项"></textarea>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <div></div> <!-- 占位 -->
+                        <button class="nav-btn next" data-next="2">
+                            <i class="fas fa-arrow-right"></i> 下一步：时间设置
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 步骤2: 时间设置 -->
+                <div class="form-section" id="section2">
+                    <div class="section-header">
+                        <h2>时间与容量设置</h2>
+                        <p>设置服务的可用日期、时段和预约容量</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="startDate"><i class="fas fa-calendar"></i> 开始日期</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="endDate"><i class="fas fa-calendar"></i> 结束日期</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duration"><i class="fas fa-hourglass"></i> 服务时长</label>
+                            <select id="duration">
+                                <option value="30">30分钟</option>
+                                <option value="60" selected>60分钟</option>
+                                <option value="90">90分钟</option>
+                                <option value="120">120分钟</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="capacity"><i class="fas fa-users"></i> 每时段容量</label>
+                            <input type="number" id="capacity" value="5" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button class="nav-btn prev" data-prev="1">
+                            <i class="fas fa-arrow-left"></i> 上一步
+                        </button>
+                        <button class="nav-btn next" data-next="3">
+                            下一步：定价策略 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 步骤3: 定价策略 -->
+                <div class="form-section" id="section3">
+                    <div class="section-header">
+                        <h2>定价策略</h2>
+                        <p>设置服务的价格和折扣策略</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="basePrice"><i class="fas fa-tag"></i> 基础价格 (¥)</label>
+                            <input type="number" id="basePrice" value="300" min="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="packageCount"><i class="fas fa-boxes"></i> 套餐数量</label>
+                            <input type="number" id="packageCount" value="3" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="pricing-options">
+                        <div class="pricing-card" data-price="single">
+                            <h3>单次预约</h3>
+                            <div class="price" id="singlePrice">¥300</div>
+                            <p>适合一次性服务预约</p>
+                            <ul>
+                                <li><i class="fas fa-check"></i> 无折扣</li>
+                                <li><i class="fas fa-check"></i> 随时预约</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pricing-card selected" data-price="package">
+                            <h3>套餐预约 (<span id="packageCountDisplay">3</span>次)</h3>
+                            <div class="price" id="packagePrice">¥810</div>
+                            <p id="packageSavings"><del>¥900</del> 节省10%</p>
+                            <ul>
+                                <li><i class="fas fa-check"></i> <span id="packageCountText">3</span>次预约套餐</li>
+                                <li><i class="fas fa-check"></i> 90天内有效</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button class="nav-btn prev" data-prev="2">
+                            <i class="fas fa-arrow-left"></i> 上一步
+                        </button>
+                        <button class="nav-btn next" data-next="4">
+                            下一步：预览与提交 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 步骤4: 预览与提交 -->
+                <div class="form-section" id="section4">
+                    <div class="section-header">
+                        <h2>预览与提交</h2>
+                        <p>确认信息无误后提交服务</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="finalCheck"><i class="fas fa-check-circle"></i> 服务条款确认</label>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                            <input type="checkbox" id="finalCheck">
+                            <label for="finalCheck" style="font-weight: normal;">我确认所有信息正确，并同意服务条款</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-navigation">
+                        <button class="nav-btn prev" data-prev="3">
+                            <i class="fas fa-arrow-left"></i> 上一步
+                        </button>
+                        <button class="nav-btn submit">
+                            <i class="fas fa-paper-plane"></i> 提交服务
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 草稿管理 -->
+            <div class="draft-manager">
+                <div class="draft-header">
+                    <h2>草稿管理</h2>
+                    <div class="draft-controls">
+                        <button class="draft-btn save">
+                            <i class="fas fa-save"></i> 保存草稿
+                        </button>
+                        <button class="draft-btn load">
+                            <i class="fas fa-folder-open"></i> 加载草稿
+                        </button>
+                        <button class="draft-btn delete">
+                            <i class="fas fa-trash"></i> 删除草稿
+                        </button>
+                    </div>
+                </div>
+                
+                <select class="draft-select">
+                    <option value="">选择草稿...</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- 预览面板 -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>服务预览</h2>
+                <div class="update-info">
+                    <i class="fas fa-sync-alt"></i> 实时更新
+                </div>
+            </div>
+            
+            <div class="preview-content">
+                <div class="preview-item">
+                    <h3>服务名称</h3>
+                    <p id="previewName">高级健康体检套餐</p>
+                </div>
+                
+                <div class="preview-item">
+                    <h3>服务分类</h3>
+                    <p id="previewCategory">医疗服务</p>
+                </div>
+                
+                <div class="preview-item">
+                    <h3>服务提供者</h3>
+                    <p id="previewProvider">请输入服务提供者</p>
+                </div>
+                
+                <div class="preview-image">
+                    <img id="previewImage" src="https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600" alt="服务预览图">
+                    <div class="placeholder" style="display: none;">
+                        <i class="fas fa-image"></i>
+                        <span>暂无图片</span>
+                    </div>
+                </div>
+                
+                <div class="preview-item">
+                    <h3>服务描述</h3>
+                    <p id="previewDescription">全面的健康体检套餐，包含血液分析、超声波检查和专业医生咨询。</p>
+                </div>
+                
+                <div class="preview-item">
+                    <h3>服务时间</h3>
+                    <p id="previewDates">2025-07-01 至 2025-07-31</p>
+                </div>
+                
+                <div class="preview-item">
+                    <h3>定价策略</h3>
+                    <p id="previewPrice">套餐预约 (3次) - ¥810</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+
+    <script>
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 步骤导航
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = this.getAttribute('data-next') || this.getAttribute('data-prev');
+                    if (target) {
+                        navigateToStep(target);
+                    }
+                });
+            });
+            
+            // 提交按钮
+            const submitBtn = document.querySelector('.nav-btn.submit');
+            submitBtn.addEventListener('click', submitService);
+            
+            // 草稿功能
+            loadDrafts(); // 加载草稿列表
+            
+            // 保存草稿按钮
+            document.querySelector('.draft-btn.save').addEventListener('click', async function() {
+                await saveDraft();
+            });
+            
+            // 加载草稿按钮
+            document.querySelector('.draft-btn.load').addEventListener('click', function() {
+                const draftId = document.querySelector('.draft-select').value;
+                loadDraft(draftId);
+            });
+            
+            // 删除草稿按钮
+            document.querySelector('.draft-btn.delete').addEventListener('click', function() {
+                const draftId = document.querySelector('.draft-select').value;
+                deleteDraftWithConfirm(draftId);
+            });
+            
+            // 草稿选择器更改事件
+            document.querySelector('.draft-select').addEventListener('change', function() {
+                // 可选：自动加载所选草稿
+                // const draftId = this.value;
+                // if (draftId) {
+                //     loadDraft(draftId);
+                // }
+            });
+            
+            // 价格选项选择
+            document.querySelectorAll('.pricing-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.pricing-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    updatePreview();
+                });
+            });
+            
+            // 表单输入实时更新预览和价格
+            const formInputs = document.querySelectorAll('input, select, textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    updatePreview();
+                    updatePricing();
+                });
+                input.addEventListener('change', function() {
+                    updatePreview();
+                    updatePricing();
+                });
+            });
+            
+            // 图片上传预览
+            const serviceImageInput = document.getElementById('serviceImage');
+            serviceImageInput.addEventListener('change', handleImageUpload);
+            
+            // 初始化日期控件默认值
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            
+            document.getElementById('startDate').value = formatDate(tomorrow);
+            document.getElementById('endDate').value = formatDate(nextMonth);
+            
+            // 初始化预览和价格
+            updatePreview();
+            updatePricing();
+        });
+        
+        // 格式化日期为YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 草稿相关常量和函数
+        const DRAFTS_STORAGE_PREFIX = 'service_drafts_';
+        
+        // 获取当前用户的草稿存储键
+        function getDraftsStorageKey() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+            if (!userInfo.phone) {
+                throw new Error('找不到用户信息');
+            }
+            return DRAFTS_STORAGE_PREFIX + userInfo.phone;
+        }
+        
+        // 处理图片上传和预览
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            const previewImage = document.getElementById('previewImage');
+            const clearBtn = document.querySelector('.clear-image-btn');
+            
+            if (file) {
+                // 验证文件类型
+                if (!file.type.startsWith('image/')) {
+                    showMessage('error', '请选择有效的图片文件');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // 验证文件大小（限制为5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showMessage('error', '图片大小不能超过5MB');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // 创建FileReader读取文件
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 更新预览图片
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    
+                    // 隐藏占位符
+                    const placeholder = previewImage.parentElement.querySelector('.placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                    
+                    // 显示清除按钮
+                    if (clearBtn) {
+                        clearBtn.style.display = 'flex';
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // 没有选择文件时，恢复默认状态
+                resetImagePreview();
+            }
+        }
+
+        // 获得图片
+        function getImageFile() {
+            const fileInput = document.getElementById('serviceImage');
+            if(fileInput && fileInput.files.length > 0) {
+                return fileInput.files[0];
+            }
+            else {
+                return null;
+            }
+        }
+        
+        // 清除图片
+        function clearImage() {
+            const fileInput = document.getElementById('serviceImage');
+            const clearBtn = document.querySelector('.clear-image-btn');
+            
+            // 清空文件输入框
+            fileInput.value = '';
+            
+            // 隐藏清除按钮
+            if (clearBtn) {
+                clearBtn.style.display = 'none';
+            }
+            
+            // 恢复默认预览
+            resetImagePreview();
+            
+            showMessage('success', '图片已清除');
+        }
+        
+        // 重置图片预览为默认状态
+        function resetImagePreview() {
+            const previewImage = document.getElementById('previewImage');
+            const placeholder = previewImage.parentElement.querySelector('.placeholder');
+            
+            // 恢复默认图片
+            previewImage.src = 'https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600';
+            
+            // 显示占位符（如果需要的话）
+            if (placeholder) {
+                placeholder.style.display = 'none'; // 保持隐藏，因为有默认图片
+            }
+        }
+        
+        // 将图片转换为Base64字符串
+        function getImageAsBase64() {
+            return new Promise((resolve) => {
+                const fileInput = document.getElementById('serviceImage');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    resolve(null);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    resolve({
+                        data: e.target.result,
+                        name: file.name,
+                        type: file.type,
+                        size: file.size
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // 表单提交函数
+        async function submitService() {
+            try {
+                // 显示加载状态
+                const submitBtn = document.querySelector('.nav-btn.submit');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+                submitBtn.disabled = true;
+                
+                // 验证必填字段
+                if (!validateForm()) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // 获取表单数据
+                const formData = await collectFormData();
+
+                // 构建上传Url参数
+                const uploadParams = buildUploadUrlParams(formData);
+
+                // 获取图片文件
+                const imageFile = new FormData();
+                const file=getImageFile();
+                imageFile.append('serviceImage', file);
+
+                // 发送请求到后端
+                const response = await fetch(`/providerCreate?${uploadParams}`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: imageFile
+                });
+                   
+                // 处理响应
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // 显示成功消息
+                    showMessage('success', '服务发布成功！');
+                    
+                    // 清除当前草稿
+                    const draftId = document.querySelector('.draft-select').value;
+                    if (draftId) {
+                        deleteDraft(draftId);
+                    }
+                    
+                    // 3秒后跳转到服务列表页
+                    setTimeout(() => {
+                        window.location.href = 'providerHome.html';
+                    }, 3000);
+                } else {
+                    // 显示错误消息
+                    showMessage('error', data.message || '发布失败，请稍后重试');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('服务发布出错:', error);
+                showMessage('error', '网络错误，请稍后重试');
+                document.querySelector('.nav-btn.submit').innerHTML = '<i class="fas fa-paper-plane"></i> 提交服务';
+                document.querySelector('.nav-btn.submit').disabled = false;
+            }
+        }
+        
+        // 收集表单数据
+        async function collectFormData() {
+            // 获取用户信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+
+            if(!userInfo || !userInfo.phone) {
+                throw new Error('找不到用户信息');
+            }
+            
+            // 获取图片数据
+            const imageData = await getImageAsBase64();
+            
+            return {
+                // 验证字段
+                identifier: userInfo.phone, // 使用手机号作为唯一标识符
+
+                // 基本信息
+                serviceName: document.getElementById('serviceName').value,
+                serviceCategory: document.getElementById('serviceCategory').value,
+                serviceProvider: document.getElementById('serviceProvider').value,
+                serviceDescription: document.getElementById('serviceDescription').value,
+                serviceImage: imageData, // 包含图片的Base64数据
+                
+                // 时间设置
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                duration: parseInt(document.getElementById('duration').value),
+                capacity: parseInt(document.getElementById('capacity').value),
+                
+                // 价格设置
+                basePrice: parseFloat(document.getElementById('basePrice').value),
+                packageCount: parseInt(document.getElementById('packageCount').value),
+                pricingModel: document.querySelector('.pricing-card.selected').getAttribute('data-price'),
+                
+                // 创建时间
+                createdAt: new Date().toISOString()
+            };
+        }
+
+        // 构建上传Url参数
+        function buildUploadUrlParams(data) {
+            const params = new URLSearchParams();
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    params.append(key, data[key]);
+                }
+            }
+
+            // 删除图片相关字段
+            params.delete('serviceImage');
+
+            return params.toString();
+        }
+        
+        // 表单验证
+        function validateForm() {
+            // 获取当前步骤
+            const currentStep = document.querySelector('.step.active').getAttribute('data-step');
+            
+            // 如果是最后一步，检查确认框
+            if (currentStep === '4') {
+                const finalCheck = document.getElementById('finalCheck');
+                if (!finalCheck.checked) {
+                    showMessage('error', '请确认服务条款');
+                    return false;
+                }
+            }
+            
+            // 检查必填字段
+            const requiredFields = [
+                { id: 'serviceName', label: '服务名称', step: '1' },
+                { id: 'serviceCategory', label: '服务分类', step: '1' },
+                { id: 'serviceProvider', label: '服务提供者', step: '1' },
+                { id: 'serviceDescription', label: '服务描述', step: '1' },
+                { id: 'startDate', label: '开始日期', step: '2' },
+                { id: 'endDate', label: '结束日期', step: '2' },
+                { id: 'basePrice', label: '基础价格', step: '3' }
+            ];
+            
+            for (const field of requiredFields) {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    showMessage('error', `${field.label}不能为空`);
+                    
+                    // 如果不是当前步骤，导航到相应步骤
+                    if (currentStep !== field.step) {
+                        navigateToStep(field.step);
+                    }
+                    
+                    element.focus();
+                    return false;
+                }
+            }
+            
+            // 验证日期范围
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            if (startDate >= endDate) {
+                showMessage('error', '结束日期必须晚于开始日期');
+                navigateToStep('2');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 页面加载时获取草稿列表
+        function loadDrafts() {
+            try {
+                const storageKey = getDraftsStorageKey();
+                const drafts = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const draftSelect = document.querySelector('.draft-select');
+                
+                // 清空选择器
+                draftSelect.innerHTML = '<option value="">选择草稿...</option>';
+                
+                // 添加草稿选项
+                drafts.forEach(draft => {
+                    const option = document.createElement('option');
+                    option.value = draft.id;
+                    option.textContent = `${draft.serviceName} - ${new Date(draft.savedAt).toLocaleDateString()}`;
+                    draftSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载草稿列表出错:', error);
+                showMessage('error', '无法加载草稿列表');
+            }
+        }
+        
+        // 保存草稿
+        async function saveDraft() {
+            try {
+                // 收集表单数据
+                const formData = await collectFormData();
+                
+                // 验证至少有服务名称
+                if (!formData.serviceName.trim()) {
+                    showMessage('error', '请至少填写服务名称');
+                    return;
+                }
+                
+                // 获取当前用户的存储键
+                const storageKey = getDraftsStorageKey();
+                
+                // 获取现有草稿
+                const drafts = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                // 创建草稿对象
+                const draft = {
+                    id: `draft_${Date.now()}`,
+                    serviceName: formData.serviceName,
+                    savedAt: new Date().toISOString(),
+                    data: formData
+                };
+                
+                // 添加新草稿
+                drafts.push(draft);
+                
+                // 限制最多保存10个草稿
+                if (drafts.length > 10) {
+                    drafts.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+                    drafts.length = 10;
+                }
+                
+                // 保存到localStorage
+                localStorage.setItem(storageKey, JSON.stringify(drafts));
+                
+                // 刷新草稿选择器
+                loadDrafts();
+                
+                // 设置选择器值为当前草稿
+                document.querySelector('.draft-select').value = draft.id;
+                
+                showMessage('success', '草稿已保存');
+            } catch (error) {
+                console.error('保存草稿出错:', error);
+                showMessage('error', '保存草稿失败：' + error.message);
+            }
+        }
+        
+        // 加载草稿
+        function loadDraft(draftId) {
+            try {
+                if (!draftId) {
+                    showMessage('error', '请选择要加载的草稿');
+                    return;
+                }
+                
+                // 获取当前用户的存储键
+                const storageKey = getDraftsStorageKey();
+                
+                // 获取草稿列表
+                const drafts = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                // 查找指定草稿
+                const draft = drafts.find(d => d.id === draftId);
+                if (!draft) {
+                    showMessage('error', '找不到指定草稿');
+                    return;
+                }
+                
+                // 填充表单数据
+                const formData = draft.data;
+                
+                // 基本信息
+                document.getElementById('serviceName').value = formData.serviceName || '';
+                document.getElementById('serviceCategory').value = formData.serviceCategory || '';
+                document.getElementById('serviceProvider').value = formData.serviceProvider || '';
+                document.getElementById('serviceDescription').value = formData.serviceDescription || '';
+                
+                // 图片处理
+                const previewImage = document.getElementById('previewImage');
+                const clearBtn = document.querySelector('.clear-image-btn');
+                
+                if (formData.serviceImage && formData.serviceImage.data) {
+                    previewImage.src = formData.serviceImage.data;
+                    
+                    // 隐藏占位文本
+                    const placeholder = previewImage.parentElement.querySelector('.placeholder');
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+                    
+                    // 显示清除按钮
+                    if (clearBtn) {
+                        clearBtn.style.display = 'flex';
+                    }
+                } else {
+                    // 恢复默认状态
+                    resetImagePreview();
+                    
+                    // 隐藏清除按钮
+                    if (clearBtn) {
+                        clearBtn.style.display = 'none';
+                    }
+                }
+                
+                // 清空文件输入框（因为我们无法通过代码设置文件输入框的值）
+                document.getElementById('serviceImage').value = '';
+                
+                // 时间设置
+                document.getElementById('startDate').value = formData.startDate || '';
+                document.getElementById('endDate').value = formData.endDate || '';
+                document.getElementById('duration').value = formData.duration || '60';
+                document.getElementById('capacity').value = formData.capacity || '5';
+                
+                // 价格设置
+                document.getElementById('basePrice').value = formData.basePrice || '300';
+                document.getElementById('packageCount').value = formData.packageCount || '3';
+                
+                // 设置价格模型
+                const pricingCards = document.querySelectorAll('.pricing-card');
+                pricingCards.forEach(card => {
+                    card.classList.remove('selected');
+                    if (card.getAttribute('data-price') === formData.pricingModel) {
+                        card.classList.add('selected');
+                    }
+                });
+                
+                // 更新预览和价格
+                updatePreview();
+                updatePricing();
+                
+                showMessage('success', '草稿已加载');
+            } catch (error) {
+                console.error('加载草稿出错:', error);
+                showMessage('error', '加载草稿失败：' + error.message);
+            }
+        }
+        
+        // 删除草稿（带确认）
+        function deleteDraftWithConfirm(draftId) {
+            if (!draftId) {
+                showMessage('error', '请选择要删除的草稿');
+                return;
+            }
+            
+            // 获取草稿名称用于确认
+            try {
+                const storageKey = getDraftsStorageKey();
+                const drafts = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const draft = drafts.find(d => d.id === draftId);
+                
+                if (!draft) {
+                    showMessage('error', '找不到指定草稿');
+                    return;
+                }
+                
+                // 确认删除
+                if (confirm(`确定要删除草稿 "${draft.serviceName}" 吗？此操作不可撤销。`)) {
+                    deleteDraft(draftId);
+                    showMessage('success', '草稿已删除');
+                }
+            } catch (error) {
+                console.error('删除草稿出错:', error);
+                showMessage('error', '删除草稿失败：' + error.message);
+            }
+        }
+        
+        // 删除草稿
+        function deleteDraft(draftId) {
+            if (!draftId) return;
+            
+            try {
+                // 获取当前用户的存储键
+                const storageKey = getDraftsStorageKey();
+                
+                // 获取草稿列表
+                const drafts = JSON.parse(localStorage.getItem(storageKey)) || [];
+                
+                // 删除指定草稿
+                const newDrafts = drafts.filter(d => d.id !== draftId);
+                
+                // 保存到localStorage
+                localStorage.setItem(storageKey, JSON.stringify(newDrafts));
+                
+                // 清空选择器
+                document.querySelector('.draft-select').value = '';
+                
+                // 刷新草稿选择器
+                loadDrafts();
+            } catch (error) {
+                console.error('删除草稿出错:', error);
+            }
+        }
+        
+        // 显示消息
+        function showMessage(type, message) {
+            // 创建消息元素
+            const messageElement = document.createElement('div');
+            messageElement.className = `message-toast ${type}`;
+            messageElement.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            // 添加样式
+            messageElement.style.position = 'fixed';
+            messageElement.style.bottom = '20px';
+            messageElement.style.right = '20px';
+            messageElement.style.background = type === 'success' ? '#4caf50' : '#f44336';
+            messageElement.style.color = 'white';
+            messageElement.style.padding = '15px 25px';
+            messageElement.style.borderRadius = '8px';
+            messageElement.style.display = 'flex';
+            messageElement.style.alignItems = 'center';
+            messageElement.style.gap = '10px';
+            messageElement.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.2)';
+            messageElement.style.zIndex = '9999';
+            messageElement.style.opacity = '0';
+            messageElement.style.transform = 'translateY(20px)';
+            messageElement.style.transition = 'all 0.3s ease';
+            
+            // 添加到页面
+            document.body.appendChild(messageElement);
+            
+            // 显示消息
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+                messageElement.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                messageElement.style.opacity = '0';
+                messageElement.style.transform = 'translateY(20px)';
+                
+                // 移除元素
+                setTimeout(() => {
+                    if (document.body.contains(messageElement)) {
+                        document.body.removeChild(messageElement);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // 导航到步骤
+        function navigateToStep(step) {
+            // 更新步骤指示器
+            document.querySelectorAll('.step').forEach(stepEl => {
+                stepEl.classList.remove('active');
+            });
+            
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            
+            // 更新进度条
+            const progress = (parseInt(step) - 1) * 33.33;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // 更新表单部分
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                document.getElementById(`section${step}`).classList.add('active');
+            }, 50);
+        }
+        
+        // 更新定价信息
+        function updatePricing() {
+            const basePrice = parseFloat(document.getElementById('basePrice').value) || 300;
+            const packageCount = parseInt(document.getElementById('packageCount').value) || 3;
+            
+            // 更新单次价格
+            document.getElementById('singlePrice').textContent = `¥${basePrice}`;
+            
+            // 计算套餐价格（给予10%折扣）
+            const originalTotal = basePrice * packageCount;
+            const packagePrice = Math.round(originalTotal * 0.9);
+            const savings = originalTotal - packagePrice;
+            const savingsPercent = Math.round((savings / originalTotal) * 100);
+            
+            // 更新套餐价格显示
+            document.getElementById('packagePrice').textContent = `¥${packagePrice}`;
+            document.getElementById('packageCountDisplay').textContent = packageCount;
+            document.getElementById('packageCountText').textContent = packageCount;
+            document.getElementById('packageSavings').innerHTML = `<del>¥${originalTotal}</del> 节省${savingsPercent}%`;
+            
+            // 更新套餐标题
+            document.querySelector('.pricing-card[data-price="package"] h3').innerHTML = `套餐预约 (<span id="packageCountDisplay">${packageCount}</span>次)`;
+            
+            // 更新预览中的价格信息
+            const selectedPrice = document.querySelector('.pricing-card.selected');
+            if (selectedPrice) {
+                const title = selectedPrice.querySelector('h3').textContent;
+                const price = selectedPrice.querySelector('.price').textContent;
+                document.getElementById('previewPrice').textContent = `${title} - ${price}`;
+            }
+        }
+        
+        // 添加时段（已移除相关逻辑）
+        
+        // 更新预览
+        function updatePreview() {
+            // 服务信息
+            document.getElementById('previewName').textContent = 
+                document.getElementById('serviceName').value || '高级健康体检套餐';
+            
+            const category = document.getElementById('serviceCategory');
+            document.getElementById('previewCategory').textContent = 
+                category.options[category.selectedIndex].text || '医疗服务';
+            
+            document.getElementById('previewProvider').textContent = 
+                document.getElementById('serviceProvider').value || '请输入服务提供者';
+            
+            document.getElementById('previewDescription').textContent = 
+                document.getElementById('serviceDescription').value || 
+                '全面的健康体检套餐，包含血液分析、超声波检查和专业医生咨询。';
+            
+            // 时间信息
+            const startDate = document.getElementById('startDate').value || '2025-07-01';
+            const endDate = document.getElementById('endDate').value || '2025-07-31';
+            document.getElementById('previewDates').textContent = `${startDate} 至 ${endDate}`;
+            
+            // 价格信息
+            const selectedPrice = document.querySelector('.pricing-card.selected');
+            if (selectedPrice) {
+                const title = selectedPrice.querySelector('h3').textContent;
+                const price = selectedPrice.querySelector('.price').textContent;
+                document.getElementById('previewPrice').textContent = `${title} - ${price}`;
+            }
+        }
+    </script>
+</body>
+</html>

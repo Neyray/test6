@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的优惠券 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --available-bg: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --used-bg: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+            --expired-bg: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* 返回按钮 */
+        .back-container {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .page-header p {
+            color: var(--text-gray);
+            max-width: 600px;
+            margin: 20px auto 0;
+        }
+        
+        /* 筛选控件 */
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+        
+        .filter-btn {
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: none;
+            background: white;
+            color: var(--text-dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        /* 优惠券列表 */
+        .coupons-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .coupon-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            height: 180px;
+        }
+        
+        .coupon-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .coupon-left {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .coupon-right {
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coupon-right::before {
+            content: "";
+            position: absolute;
+            left: -10px;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: inherit;
+            transform: rotate(15deg);
+        }
+        
+        .coupon-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .coupon-type {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .coupon-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .coupon-desc {
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            margin-bottom: 15px;
+        }
+        
+        .coupon-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+        
+        .coupon-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        /* 优惠券状态样式 */
+        .coupon-available .coupon-right {
+            background: var(--available-bg);
+        }
+        
+        .coupon-available .coupon-status {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .coupon-used .coupon-right {
+            background: var(--used-bg);
+            color: var(--text-dark);
+        }
+        
+        .coupon-used .coupon-status {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        .coupon-expired .coupon-right {
+            background: var(--expired-bg);
+        }
+        
+        .coupon-expired .coupon-status {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+        
+        .empty-state p {
+            color: var(--text-gray);
+            margin-bottom: 25px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .coupons-container {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .coupons-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .coupon-card {
+                height: auto;
+                flex-direction: column;
+            }
+            
+            .coupon-right {
+                width: 100%;
+                padding: 15px 0;
+            }
+            
+            .coupon-right::before {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 80%;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回按钮 -->
+    <div class="back-container">
+        <button class="back-btn" id="backBtn">
+            <i class="fas fa-arrow-left"></i>
+            返回用户中心
+        </button>
+    </div>
+    
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <h1>我的优惠券</h1>
+        <p>查看和管理您账户中的所有优惠券，享受专属优惠</p>
+    </div>
+    
+    <!-- 筛选控件 -->
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">
+            <i class="fas fa-ticket-alt"></i>
+            全部优惠券
+        </button>
+        <button class="filter-btn" data-filter="AVAILABLE">
+            <i class="fas fa-check-circle"></i>
+            可用优惠券
+        </button>
+        <button class="filter-btn" data-filter="USED">
+            <i class="fas fa-history"></i>
+            已使用优惠券
+        </button>
+        <button class="filter-btn" data-filter="EXPIRED">
+            <i class="fas fa-hourglass-end"></i>
+            已过期优惠券
+        </button>
+    </div>
+    
+    <!-- 优惠券列表 -->
+    <div class="coupons-container" id="couponsContainer">
+        <!-- 优惠券将通过JavaScript动态生成 -->
+    </div>
+    
+    <script>
+        // 状态映射
+        const statusMap = {
+            AVAILABLE: { text: "可使用", class: "coupon-available" },
+            USED: { text: "已使用", class: "coupon-used" },
+            EXPIRED: { text: "已过期", class: "coupon-expired" }
+        };
+
+        let coupons = [];
+        let isLoading = false;
+        let isError = false;
+
+        // 显示加载中
+        function showLoading() {
+            const container = document.getElementById("couponsContainer");
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h3>正在加载优惠券...</h3>
+                    <p>请稍候，正在从服务器获取您的优惠券信息</p>
+                </div>
+            `;
+        }
+
+        // 显示错误
+        function showError(msg = "加载失败，请稍后重试") {
+            const container = document.getElementById("couponsContainer");
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>出错了</h3>
+                    <p>${msg}</p>
+                    <button class="back-btn" style="background: var(--primary-gradient); color: white;" onclick="fetchCoupons()">
+                        <i class="fas fa-redo"></i> 重试
+                    </button>
+                </div>
+            `;
+        }
+
+        // 渲染优惠券
+        function renderCoupons(filter = "all") {
+            const container = document.getElementById("couponsContainer");
+            container.innerHTML = "";
+            let filteredCoupons = filter === "all" ? coupons : coupons.filter(coupon => coupon.status === filter);
+            if (filteredCoupons.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>暂无优惠券</h3>
+                        <p>您当前没有${getFilterText(filter)}的优惠券</p>
+                        <button class="back-btn" style="background: var(--primary-gradient); color: white;" onclick="window.location.href='userHome.html'">
+                            <i class="fas fa-gift"></i> 去获取优惠券
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            filteredCoupons.forEach(coupon => {
+                const statusInfo = statusMap[coupon.status] || statusMap.AVAILABLE;
+                const valueDisplay = coupon.type === "折扣券" ? `${coupon.value}折` : `¥${coupon.value}`;
+                const card = document.createElement("div");
+                card.className = `coupon-card ${statusInfo.class}`;
+                card.innerHTML = `
+                    <div class="coupon-left">
+                        <div>
+                            <div class="coupon-title">
+                                <i class="fas fa-tag"></i>
+                                ${coupon.title}
+                            </div>
+                            <p class="coupon-desc">${coupon.description}</p>
+                        </div>
+                        <div class="coupon-meta">
+                            <span><i class="far fa-calendar"></i> 有效期至: ${coupon.validDate}</span>
+                            <span><i class="fas fa-hashtag"></i> ${coupon.id}</span>
+                        </div>
+                        <div class="coupon-status">${statusInfo.text}</div>
+                    </div>
+                    <div class="coupon-right">
+                        <div class="coupon-value">${valueDisplay}</div>
+                        <div class="coupon-type">${coupon.type}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 获取筛选文本
+        function getFilterText(filter) {
+            switch(filter) {
+                case "AVAILABLE": return "可用";
+                case "USED": return "已使用";
+                case "EXPIRED": return "已过期";
+                default: return "任何";
+            }
+        }
+
+        // 更新筛选按钮数量
+        function updateFilterCounts() {
+            const counts = { all: coupons.length, AVAILABLE: 0, USED: 0, EXPIRED: 0 };
+            coupons.forEach(c => {
+                if (c.status === "AVAILABLE") counts.AVAILABLE++;
+                else if (c.status === "USED") counts.USED++;
+                else if (c.status === "EXPIRED") counts.EXPIRED++;
+            });
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const filter = btn.getAttribute('data-filter');
+                let text = btn.textContent.replace(/\(\d+\)/, '');
+                if (filter && counts[filter] !== undefined) {
+                    btn.innerHTML = btn.innerHTML.replace(/\(\d+\)/, ''); // 清除旧数量
+                    btn.innerHTML = `${text} <span style='color:#888;font-size:0.95em;'>(${counts[filter]})</span>`;
+                } else if (filter === 'all') {
+                    btn.innerHTML = `${text} <span style='color:#888;font-size:0.95em;'>(${counts.all})</span>`;
+                }
+            });
+        }
+
+        // 拉取优惠券数据
+        async function fetchCoupons() {
+            try {
+                isLoading = true;
+                isError = false;
+                showLoading();
+
+                // 获得验证字段
+
+                const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+                if (!userInfo.phone) {
+                    throw new Error('找不到用户信息');
+                }
+
+                const param = new URLSearchParams();
+                param.append('phone', userInfo.phone);
+
+                const response = await fetch(`/coupons?${param.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('服务器响应异常');
+                }
+                
+                const data = await response.json();
+                if (!data.success || !Array.isArray(data.coupons)) {
+                    throw new Error('数据格式错误');
+                }
+                
+                coupons = data.coupons;
+                isLoading = false;
+                isError = false;
+                renderCoupons(getCurrentFilter());
+                updateFilterCounts();
+            } catch (err) {
+                isLoading = false;
+                isError = true;
+                showError(err.message || '加载失败，请稍后重试');
+            }
+        }
+
+        // 获取当前筛选
+        function getCurrentFilter() {
+            const btn = document.querySelector('.filter-btn.active');
+            return btn ? btn.getAttribute('data-filter') : 'all';
+        }
+
+        // 初始化页面
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 拉取数据
+            fetchCoupons();
+
+            // 返回按钮事件
+            document.getElementById('backBtn').addEventListener('click', function() {
+                window.location.href = 'userHome.html';
+            });
+
+            // 筛选按钮事件
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    renderCoupons(this.getAttribute('data-filter'));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

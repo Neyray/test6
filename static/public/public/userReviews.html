@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务评价 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --star-color: #ffc107;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 - 复用用户中心样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .reviews-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 5%;
+        }
+        
+        .page-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* 待评价服务列表 */
+        .pending-reviews {
+            margin-bottom: 4rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .service-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .service-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .service-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .service-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+        
+        .service-date {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .service-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 5px;
+        }
+        
+        .meta-value {
+            font-weight: 600;
+        }
+        
+        .review-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .review-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 历史评价区域 */
+        .history-reviews {
+            margin-top: 4rem;
+        }
+        
+        .review-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+        
+        .review-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .review-date {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+        }
+        
+        .review-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stars {
+            color: var(--star-color);
+            margin-right: 10px;
+        }
+        
+        .rating-value {
+            font-weight: 600;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .review-content {
+            line-height: 1.7;
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+        }
+        
+        .review-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .review-image {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        
+        .review-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 评价模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .review-modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(-30px);
+            transition: var(--transition);
+            opacity: 0;
+        }
+        
+        .modal-overlay.active .review-modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .service-review-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .modal-service-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .modal-service-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-service-details h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-service-details .date {
+            color: var(--text-gray);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 星级评分 */
+        .rating-section {
+            margin-bottom: 2rem;
+        }
+        
+        .rating-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        
+        .star {
+            font-size: 2.5rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .star:hover, .star.active {
+            color: var(--star-color);
+        }
+        
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+        
+        /* 富文本编辑器 */
+        .editor-section {
+            margin-bottom: 2rem;
+        }
+        
+        .editor-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        #editor {
+            height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        /* 图片上传 */
+        .upload-section {
+            margin-bottom: 2rem;
+        }
+        
+        .upload-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #f0f3ff;
+            border-radius: 8px;
+            color: #667eea;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .upload-btn:hover {
+            background: #e0e7ff;
+        }
+        
+        .preview-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .preview-image {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        /* 提交按钮 */
+        .submit-section {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .submit-btn {
+            padding: 12px 40px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        /* 浮动通知 */
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: var(--transition);
+        }
+        
+        .notification.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification i {
+            font-size: 1.5rem;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .service-review-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .modal-service-image {
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .rating-stars .star {
+                font-size: 2rem;
+            }
+            
+            #editor {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="userHome.html">用户中心</a></li>
+                    <li><a href="userBooking.html">预约中心</a></li>
+                    <li><a href="userRecords.html">预约记录</a></li>
+                    <li><a href="userReviews.html" class="active">评价中心</a></li>
+                    <li><a href="userProfile.html">个人设置</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>张</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="userProfile.html"><i class="fas fa-user-circle"></i> 个人资料</a></li>
+                        <li><a href="#"><i class="fas fa-ticket"></i> 优惠卷</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="reviews-container">
+        <div class="page-header">
+            <h1>服务评价中心</h1>
+            <p>分享您的服务体验，帮助其他用户做出更好的选择</p>
+        </div>
+        
+        <!-- 待评价服务列表 -->
+        <section class="pending-reviews">
+            <h2 class="section-title">待评价服务</h2>
+            
+            <div class="services-grid" id="pendingServices">
+                <!-- 服务卡片会通过JS动态生成 -->
+            </div>
+        </section>
+        
+        <!-- 历史评价展示 -->
+        <section class="history-reviews">
+            <h2 class="section-title">历史评价</h2>
+            
+            <div id="historyReviews">
+                <!-- 历史评价会通过JS动态生成 -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- 评价模态框 -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="review-modal">
+            <div class="modal-header">
+                <h2>服务评价</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="service-review-info">
+                    <div class="modal-service-image">
+                        <img id="modalServiceImage" src="https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600" alt="服务图片">
+                    </div>
+                    
+                    <div class="modal-service-details">
+                        <h3 id="modalServiceName">高级健康体检套餐</h3>
+                        <div class="date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>服务日期: 2025-07-05</span>
+                        </div>
+                        <div class="date">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>服务地点: 市中心医院体检中心</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 星级评分 -->
+                <div class="rating-section">
+                    <div class="rating-title">服务评分</div>
+                    <div class="rating-stars">
+                        <div class="star" data-value="1"><i class="far fa-star"></i></div>
+                        <div class="star" data-value="2"><i class="far fa-star"></i></div>
+                        <div class="star" data-value="3"><i class="far fa-star"></i></div>
+                        <div class="star" data-value="4"><i class="far fa-star"></i></div>
+                        <div class="star" data-value="5"><i class="far fa-star"></i></div>
+                    </div>
+                    <div class="rating-labels">
+                        <span>非常不满意</span>
+                        <span>非常满意</span>
+                    </div>
+                </div>
+                
+                <!-- 富文本编辑器 -->
+                <div class="editor-section">
+                    <div class="editor-title">详细评价</div>
+                    <div id="editor">
+                        <p>请在此分享您的服务体验...</p>
+                    </div>
+                </div>
+                
+                <!-- 图片上传 -->
+                <div class="upload-section">
+                    <div class="upload-title">上传图片 (可选)</div>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">点击或拖拽图片到此处上传</div>
+                        <div class="upload-btn">选择图片</div>
+                        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                    </div>
+                    <div class="preview-images" id="previewImages"></div>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <div class="submit-section">
+                    <button class="submit-btn" id="submitReview">
+                        <i class="fas fa-paper-plane"></i> 提交评价
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 浮动通知 -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span>评价提交成功！感谢您的反馈</span>
+    </div>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+
+    <!-- 引入Quill富文本编辑器 -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        // 待评价服务数据
+        const pendingServices = [
+            {
+                id: 1,
+                name: "高级健康体检套餐",
+                image: "https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600",
+                date: "2025-07-05",
+                provider: "张医生",
+                price: 680,
+                location: "市中心医院体检中心"
+            },
+            {
+                id: 2,
+                name: "面部深层清洁护理",
+                image: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=600",
+                date: "2025-07-02",
+                provider: "李美容师",
+                price: 320,
+                location: "美妍美容会所"
+            },
+            {
+                id: 3,
+                name: "私人健身训练课程",
+                image: "https://images.unsplash.com/photo-1534367507879-15a4a9d21e11?q=80&w=600",
+                date: "2025-06-30",
+                provider: "王教练",
+                price: 180,
+                location: "力健健身房"
+            }
+        ];
+        
+        // 历史评价数据
+        const historyReviews = [
+            {
+                id: 1,
+                service: "牙齿美白护理",
+                date: "2025-06-28",
+                rating: 4,
+                content: "服务非常专业，医生很有耐心，详细解释了整个过程。效果也很明显，牙齿比之前白了很多。唯一不足是等待时间稍长。",
+                images: [
+                    "https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?q=80&w=600"
+                ]
+            },
+            {
+                id: 2,
+                service: "心理咨询服务",
+                date: "2025-06-15",
+                rating: 5,
+                content: "赵咨询师非常专业且有同理心，在谈话过程中让我感到非常放松和被理解。她提供的建议非常实用，帮助我解决了困扰已久的问题。强烈推荐！",
+                images: []
+            },
+            {
+                id: 3,
+                service: "高级瑜伽私教课程",
+                date: "2025-06-10",
+                rating: 4.5,
+                content: "刘老师的瑜伽课非常棒，针对我的身体情况定制了训练计划。上了几次课后，我的柔韧性和平衡感都有明显提升。课程环境也很舒适，让人放松。",
+                images: [
+                    "https://images.unsplash.com/photo-1545389336-cf090694435e?q=80&w=600",
+                    "https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?q=80&w=600"
+                ]
+            }
+        ];
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 渲染待评价服务
+            renderPendingServices();
+            
+            // 渲染历史评价
+            renderHistoryReviews();
+            
+            // 初始化富文本编辑器
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+            
+            // 星级评分交互
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    
+                    // 更新星星样式
+                    stars.forEach((s, index) => {
+                        if (index < value) {
+                            s.innerHTML = '<i class="fas fa-star"></i>';
+                            s.classList.add('active');
+                        } else {
+                            s.innerHTML = '<i class="far fa-star"></i>';
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // 图片上传交互
+            const uploadArea = document.getElementById('uploadArea');
+            const imageUpload = document.getElementById('imageUpload');
+            const previewImages = document.getElementById('previewImages');
+            
+            uploadArea.addEventListener('click', function() {
+                imageUpload.click();
+            });
+            
+            imageUpload.addEventListener('change', function(e) {
+                const files = e.target.files;
+                handleImageUpload(files);
+            });
+            
+            // 拖拽上传功能
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#667eea';
+                this.style.backgroundColor = '#f8f9ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                this.style.borderColor = '#ddd';
+                this.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#ddd';
+                this.style.backgroundColor = '';
+                
+                const files = e.dataTransfer.files;
+                handleImageUpload(files);
+            });
+            
+            // 模态框控制
+            const modal = document.getElementById('reviewModal');
+            const closeModal = document.getElementById('closeModal');
+            
+            closeModal.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            
+            // 提交评价按钮
+            document.getElementById('submitReview').addEventListener('click', function() {
+                showNotification();
+                
+                // 在实际项目中，这里会提交评价数据到后端
+                /*
+                const formData = new FormData();
+                formData.append('rating', getRatingValue());
+                formData.append('content', quill.root.innerHTML);
+                
+                // 添加图片文件
+                const files = imageUpload.files;
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('images[]', files[i]);
+                }
+                
+                fetch('/api/submit-review', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification();
+                        modal.classList.remove('active');
+                        // 刷新页面或更新列表
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+                */
+            });
+        });
+        
+        // 渲染待评价服务
+        function renderPendingServices() {
+            const container = document.getElementById('pendingServices');
+            container.innerHTML = '';
+            
+            pendingServices.forEach(service => {
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="service-image">
+                            <img src="${service.image}" alt="${service.name}">
+                        </div>
+                        <div class="service-info">
+                            <h3>${service.name}</h3>
+                            <div class="service-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${service.date}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="service-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">服务提供者</div>
+                                <div class="meta-value">${service.provider}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">服务价格</div>
+                                <div class="meta-value">¥${service.price}</div>
+                            </div>
+                        </div>
+                        <div class="service-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">服务地点</div>
+                                <div class="meta-value">${service.location}</div>
+                            </div>
+                        </div>
+                        <button class="review-btn" data-id="${service.id}">
+                            <i class="fas fa-edit"></i> 立即评价
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // 添加评价按钮事件
+            document.querySelectorAll('.review-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const serviceId = this.getAttribute('data-id');
+                    openReviewModal(serviceId);
+                });
+            });
+        }
+        
+        // 渲染历史评价
+        function renderHistoryReviews() {
+            const container = document.getElementById('historyReviews');
+            container.innerHTML = '';
+            
+            historyReviews.forEach((review, index) => {
+                const delay = index * 0.1;
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'review-item';
+                reviewElement.style.animationDelay = `${delay}s`;
+                
+                // 渲染星星
+                const starsHtml = renderStars(review.rating);
+                
+                // 渲染图片
+                let imagesHtml = '';
+                if (review.images.length > 0) {
+                    imagesHtml = '<div class="review-images">';
+                    review.images.forEach(image => {
+                        imagesHtml += `
+                            <div class="review-image">
+                                <img src="${image}" alt="评价图片">
+                            </div>
+                        `;
+                    });
+                    imagesHtml += '</div>';
+                }
+                
+                reviewElement.innerHTML = `
+                    <div class="review-header">
+                        <div class="review-title">${review.service}</div>
+                        <div class="review-date">${review.date}</div>
+                    </div>
+                    <div class="review-rating">
+                        <div class="stars">
+                            ${starsHtml}
+                        </div>
+                        <div class="rating-value">${review.rating}</div>
+                    </div>
+                    <div class="review-content">
+                        ${review.content}
+                    </div>
+                    ${imagesHtml}
+                `;
+                
+                container.appendChild(reviewElement);
+            });
+        }
+        
+        // 渲染星星
+        function renderStars(rating) {
+            let starsHtml = '';
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                starsHtml += '<i class="fas fa-star"></i>';
+            }
+            
+            if (halfStar) {
+                starsHtml += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                starsHtml += '<i class="far fa-star"></i>';
+            }
+            
+            return starsHtml;
+        }
+        
+        // 打开评价模态框
+        function openReviewModal(serviceId) {
+            const service = pendingServices.find(s => s.id == serviceId);
+            if (!service) return;
+            
+            // 设置模态框内容
+            document.getElementById('modalServiceImage').src = service.image;
+            document.getElementById('modalServiceName').textContent = service.name;
+            
+            // 重置表单
+            document.querySelectorAll('.star').forEach(star => {
+                star.innerHTML = '<i class="far fa-star"></i>';
+                star.classList.remove('active');
+            });
+            
+            document.getElementById('previewImages').innerHTML = '';
+            document.getElementById('imageUpload').value = '';
+            
+            // 打开模态框
+            document.getElementById('reviewModal').classList.add('active');
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(files) {
+            const previewContainer = document.getElementById('previewImages');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.match('image.*')) continue;
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'preview-image';
+                    
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="预览图片">
+                        <div class="remove-image" data-index="${i}">&times;</div>
+                    `;
+                    
+                    previewContainer.appendChild(preview);
+                    
+                    // 添加删除按钮事件
+                    preview.querySelector('.remove-image').addEventListener('click', function() {
+                        preview.remove();
+                    });
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 获取评分值
+        function getRatingValue() {
+            const activeStars = document.querySelectorAll('.star.active');
+            return activeStars.length;
+        }
+        
+        // 显示浮动通知
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('active');
+            
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

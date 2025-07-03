@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --tab-active: #667eea;
+            --tab-inactive: #e0e0e0;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+        
+        /* 账户信息头 */
+        .profile-header {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+        
+        .avatar-container {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .avatar-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-info h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .profile-role {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #667eea;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+        }
+        
+        /* 标签页导航 */
+        .tabs-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            color: var(--text-gray);
+        }
+        
+        .tab-btn.active {
+            color: var(--tab-active);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #f8f9ff;
+            color: #667eea;
+        }
+        
+        /* 标签页内容 */
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary-gradient);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* 开关样式 */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .toggle-container:hover {
+            background: #f8f9ff;
+        }
+        
+        .toggle-label {
+            flex: 1;
+        }
+        
+        .toggle-label h4 {
+            margin-bottom: 4px;
+        }
+        
+        .toggle-label p {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: var(--primary-gradient);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* 按钮样式 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 保存成功动画 */
+        .save-success {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        
+        .save-success.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .tabs-header {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="userHome.html">用户中心</a></li>
+                    <li><a href="userBooking.html">预约中心</a></li>
+                    <li><a href="userRecords.html">预约记录</a></li>
+                    <li><a href="userReviews.html">评价中心</a></li>
+                    <li><a href="userProfile.html" class="active">个人设置</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>张</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="userProfile.html"><i class="fas fa-user-circle"></i> 个人资料</a></li>
+                        <li><a href="#"><i class="fas fa-ticket"></i> 优惠券</a></li>
+                        <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="dashboard-container">
+        <!-- 账户信息头 -->
+        <section class="profile-header">
+            <div class="avatar-container" id="avatarContainer">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span>头</span>
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+            </div>
+            
+            <div class="profile-info">
+                <h1>姓名</h1>
+                <div class="profile-role">普通用户</div>
+                <p>预约管理系统</p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">注册时间</span>
+                        <span class="stat-value">未知</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最后登录</span>
+                        <span class="stat-value">未知</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">预约次数</span>
+                        <span class="stat-value">未知</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 标签页导航 -->
+        <section class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="personal">个人信息</button>
+                <button class="tab-btn" data-tab="security">安全设置</button>
+                <button class="tab-btn" data-tab="preferences">偏好设置</button>
+            </div>
+            
+            <!-- 个人信息标签页 -->
+            <div class="tab-content active" id="personalTab">
+                <h2 class="section-title">个人信息设置</h2>
+                
+                <form id="personalForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName"><i class="fas fa-user"></i> 姓名</label>
+                            <input type="text" id="fullName" value="未知">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> 电子邮箱</label>
+                            <input type="email" id="email" value="userEmail@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone"><i class="fas fa-phone"></i> 手机号码</label>
+                            <input type="tel" id="phone" value="userPhone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gender"><i class="fas fa-venus-mars"></i> 性别</label>
+                            <select id="gender">
+                                <option value="male">男</option>
+                                <option value="female">女</option>
+                                <option value="other" selected>未选择</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="birthday"><i class="fas fa-birthday-cake"></i> 出生日期</label>
+                            <input type="date" id="birthday" value="2000-01-01">
+                        </div>
+                        
+                        
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio"><i class="fas fa-file-alt"></i> 个人简介</label>
+                        <textarea id="bio" rows="4">喜欢尝试各种新服务，希望通过平台找到专业且优质的服务。</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 安全设置标签页 -->
+            <div class="tab-content" id="securityTab">
+                <h2 class="section-title">账户安全设置</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currentPassword"><i class="fas fa-lock"></i> 当前密码</label>
+                        <input type="password" id="currentPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword"><i class="fas fa-key"></i> 新密码</label>
+                        <input type="password" id="newPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword"><i class="fas fa-key"></i> 确认新密码</label>
+                        <input type="password" id="confirmPassword">
+                    </div>
+                </div>
+                
+                <div class="password-strength">
+                    <div class="strength-meter">
+                        <div class="strength-bar weak"></div>
+                    </div>
+                    <div class="strength-text">密码强度: 弱</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="changePasswordBtn">
+                        <i class="fas fa-sync-alt"></i> 更改密码
+                    </button>
+                </div>
+                
+                <h3 class="section-title" style="margin-top: 2rem;">账户安全</h3>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>登录短信验证</h4>
+                        <p>使用手机短信验证码登录账户</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsAuthToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>异地登录提醒</h4>
+                        <p>检测到异地登录时发送提醒</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="loginAlertToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存安全设置
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 偏好设置标签页 -->
+            <div class="tab-content" id="preferencesTab">
+                <h2 class="section-title">个人偏好设置</h2>
+                
+                <h3>通知设置</h3>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>电子邮件通知</h4>
+                        <p>接收预约确认和提醒邮件</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>短信通知</h4>
+                        <p>接收预约提醒短信</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <h3 class="section-title" style="margin-top: 2rem;">预约偏好</h3>
+                
+                <div class="form-group">
+                    <label for="preferredTime"><i class="fas fa-clock"></i> 偏好预约时间</label>
+                    <select id="preferredTime">
+                        <option value="morning">上午 (8:00-12:00)</option>
+                        <option value="afternoon" selected>下午 (12:00-18:00)</option>
+                        <option value="evening">晚上 (18:00-22:00)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferredCategory"><i class="fas fa-tags"></i> 感兴趣的服务类别</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" checked> 医疗健康
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox"> 美容美发
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox"> 健身运动
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>自动确认预约</h4>
+                        <p>自动确认符合我时间偏好的预约请求</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoConfirmToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>预约提前提醒</h4>
+                        <p>提前24小时提醒我即将到来的预约</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reminderToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-primary" id="savePreferencesBtn">
+                        <i class="fas fa-save"></i> 保存偏好设置
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | <a href="#">隐私政策</a> | <a href="#">使用条款</a></p>
+    </footer>
+    
+    <!-- 保存成功提示 -->
+    <div class="save-success" id="saveSuccess">
+        <i class="fas fa-check-circle"></i>
+        <span>设置已成功保存！</span>
+    </div>
+
+    <script>
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取用户信息并更新页面
+            fetchUserProfileData();
+            
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 标签页切换
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 移除所有活动状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // 头像上传（本地预览和上传到服务器）
+            const avatarContainer = document.getElementById('avatarContainer');
+            const avatarUpload = document.getElementById('avatarUpload');
+            
+            avatarContainer.addEventListener('click', function() {
+                avatarUpload.click();
+            });
+            
+            avatarUpload.addEventListener('change', async function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+
+                    // 检查文件类型
+                    if (!file.type.startsWith('image/')) {
+                        showSaveError('请选择一个有效的图片文件');
+                        return;
+                    }
+
+                    if( file.size > 5 * 1024 * 1024) { // 限制文件大小为5MB
+                        showSaveError('图片大小不能超过5MB');
+                        return;
+                    }
+                    
+                    // 前端预览
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const avatar = document.getElementById('profileAvatar');
+                        avatar.innerHTML = '';
+                        avatar.style.background = 'none';
+                        
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.borderRadius = '50%';
+                        img.style.objectFit = 'cover';
+                        
+                        const overlay = document.createElement('div');
+                        overlay.className = 'avatar-overlay';
+                        overlay.innerHTML = '<i class="fas fa-camera"></i>';
+                        
+                        avatar.appendChild(img);
+                        avatar.appendChild(overlay);
+                    }
+                    reader.readAsDataURL(file);
+
+                    // 上传到服务器
+                    try {
+                        const avatarUrl = await uploadAvatar(file);
+                        // 立即更新头像
+                        if(avatarUrl){
+                            const avatar = document.getElementById('profileAvatar');
+                            avatar.innerHTML = '';
+                            avatar.style.background = 'none';
+
+                            const img = document.createElement('img');
+                            img.src = avatarUrl;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.borderRadius = '50%';
+                            img.style.objectFit = 'cover';
+
+                            const overlay = document.createElement('div');
+                            overlay.className = 'avatar-overlay';
+                            overlay.innerHTML = '<i class="fas fa-camera"></i>';
+
+                            avatar.appendChild(img);
+                            avatar.appendChild(overlay);
+                        }
+                        showSaveSuccess();
+                    } catch (error) {
+                        console.error('头像上传失败:', error);
+                        showSaveError('头像上传失败，请稍后再试');
+                    }
+                }
+            });
+            
+            // 更新个人信息
+            const personalForm = document.getElementById('personalForm');
+            personalForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                try {
+                    // 获取表单数据
+                    const userData = {
+                        name: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        gender: document.getElementById('gender').value,
+                        birthday: document.getElementById('birthday').value,
+                        bio: document.getElementById('bio').value
+                    };
+
+                    // 格式验证
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    const phoneRegex = /^1[3-9]\d{9}$/;
+
+                    if(userData.email && !emailRegex.test(userData.email)) {
+                        showSaveError('请输入有效的电子邮箱地址');
+                        return;
+                    }
+
+                    if(userData.phone && !phoneRegex.test(userData.phone)) {
+                        showSaveError('请输入有效的手机号码');
+                        return;
+                    }
+
+                    // 增加验证字段
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    if(!userInfo || !userInfo.phone) {
+                        showSaveError('用户信息不完整，请重新登录');
+                        return;
+                    }
+
+                    const identifier = userInfo.phone; // 使用手机号作为标识符
+                    userData.identifier = identifier;
+
+                    // API端点：更新个人数据
+                    const response = await fetch('/updateProfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP响应失败: ${response.status} ${response.statusText}`);
+                    } 
+
+                    const data = await response.json();
+
+                    if(!data.success) {
+                        showSaveError(data.message || '更新个人信息失败，请稍后再试');
+                    }else{
+                        showSaveSuccess();
+                        // 更新本地存储的用户信息
+                        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                        localStorage.setItem('userInfo', JSON.stringify({
+                            username: userInfo.username,
+                            email: document.getElementById('email').value,
+                            phone: document.getElementById('phone').value,
+                            role: userInfo.role,
+                            loginTime: userInfo.loginTime
+                        }));
+                    }
+                } catch (error) {
+                    console.error('保存个人信息时出错:', error);
+                    showSaveError('保存个人信息失败，请稍后再试');
+                }
+            });
+            
+            // 保存偏好设置
+            const savePreferencesBtn = document.getElementById('savePreferencesBtn');
+            savePreferencesBtn.addEventListener('click', async function() {
+                try {
+                    // 获取偏好设置
+                    const preferences = {
+                        preferredTime: document.getElementById('preferredTime').value,
+                        categories: getCategories()
+                    };
+
+                    // 增加验证字段
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    if(!userInfo || !userInfo.phone) {
+                        showSaveError('用户信息不完整，请重新登录');
+                        return;
+                    }
+                    const identifier = userInfo.phone; // 使用手机号作为标识符
+                    preferences.identifier = identifier;
+
+                    const response = await fetch('/savePreferences', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(preferences)
+                    });
+
+                    if(!response.ok) {
+                        throw new Error(`HTTP响应失败: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if(!data.success) {
+                        showSaveError(data.message || '保存偏好设置失败，请稍后再试');
+                    } else {
+                        showSaveSuccess();
+                    }
+                } catch (error) {
+                    console.error('保存偏好设置时出错:', error);
+                    showSaveError('保存偏好设置失败，请稍后再试');
+                }
+            });
+            
+            // 更改密码
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            changePasswordBtn.addEventListener('click',async function() {
+                const currentPass = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirmPass = document.getElementById('confirmPassword').value;
+                
+                if (!currentPass || !newPass || !confirmPass) {
+                    showSaveError('请填写所有密码字段');
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    showSaveError('新密码和确认密码不匹配');
+                    return;
+                }
+                
+                if (newPass.length < 8) {
+                    showSaveError('密码长度至少需要8个字符');
+                    return;
+                }
+
+                // 获取用户标识
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if (!userInfo || !userInfo.phone) {
+                    showSaveError('用户信息不完整，请重新登录');
+                    return;
+                }
+
+                // 构建请求数据
+                const userPasswordData = {
+                    identifier: userInfo.phone, // 使用手机号作为标识符
+                    currentPassword: currentPass,
+                    newPassword: newPass
+                };
+                
+                try {
+                    const response = await fetch('/changePassword', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(userPasswordData)
+                    });
+
+                    if(!response.ok) {
+                        throw new Error(`HTTP响应失败: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSaveSuccess();
+                        // 清空密码输入框
+                        document.getElementById('currentPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    } else {
+                        showSaveError(data.message || '更改密码失败，请稍后再试');
+                    }
+                } catch (error) {
+                    console.error('更改密码时出错:', error);
+                    showSaveError('更改密码失败，请稍后再试');
+                }
+            });
+            
+            // 密码强度检测
+            const newPassword = document.getElementById('newPassword');
+            if (newPassword) {
+                newPassword.addEventListener('input', function() {
+                    const password = this.value;
+                    const strengthBar = document.querySelector('.strength-bar');
+                    const strengthText = document.querySelector('.strength-text');
+                    
+                    if (!password) {
+                        strengthBar.className = 'strength-bar';
+                        strengthBar.style.width = '0';
+                        strengthText.textContent = '密码强度: ';
+                        return;
+                    }
+                    
+                    let strength = 0;
+                    if (password.length >= 8) strength += 25;
+                    if (/[A-Z]/.test(password)) strength += 25;
+                    if (/[0-9]/.test(password)) strength += 25;
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+                    
+                    strengthBar.style.width = strength + '%';
+                    
+                    if (strength < 50) {
+                        strengthBar.className = 'strength-bar weak';
+                        strengthText.textContent = '密码强度: 弱';
+                    } else if (strength < 75) {
+                        strengthBar.className = 'strength-bar moderate';
+                        strengthBar.style.background = '#fd7e14';
+                        strengthText.textContent = '密码强度: 中';
+                    } else {
+                        strengthBar.className = 'strength-bar strong';
+                        strengthBar.style.background = '#28a745';
+                        strengthText.textContent = '密码强度: 强';
+                    }
+                });
+            }
+
+            // 退出登录
+            const logoutBtn = document.getElementById('logoutBtn');
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // 清除本地存储的用户信息
+                localStorage.removeItem('userInfo');
+                
+                // 跳转到登录页面
+                window.location.href = 'index.html';
+            });
+        });
+        
+        // 显示保存成功提示
+        function showSaveSuccess() {
+            const saveSuccess = document.getElementById('saveSuccess');
+            saveSuccess.classList.add('show');
+            
+            setTimeout(() => {
+                saveSuccess.classList.remove('show');
+            }, 3000);
+        }
+
+        // 显示保存失败提示
+        function showSaveError(errorMessage = '设置保存失败！') {
+            // 创建保存失败提示元素
+            let saveError = document.getElementById('saveError');
+    
+            if (!saveError) {
+                saveError = document.createElement('div');
+                saveError.id = 'saveError';
+                saveError.className = 'save-error';
+                saveError.innerHTML = `
+                    <i class="fas fa-times-circle"></i>
+                    <span>${errorMessage}</span>
+                `;
+        
+                // 添加样式
+                saveError.style.position = 'fixed';
+                saveError.style.bottom = '20px';
+                saveError.style.right = '20px';
+                saveError.style.background = '#dc3545';
+                saveError.style.color = 'white';
+                saveError.style.padding = '15px 25px';
+                saveError.style.borderRadius = '8px';
+                saveError.style.display = 'flex';
+                saveError.style.alignItems = 'center';
+                saveError.style.gap = '10px';
+                saveError.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.15)';
+                saveError.style.transform = 'translateY(100px)';
+                saveError.style.opacity = '0';
+                saveError.style.transition = 'all 0.4s ease';
+                saveError.style.zIndex = '1000';
+        
+                document.body.appendChild(saveError);
+            } else {
+                // 更新错误消息
+                saveError.querySelector('span').textContent = errorMessage;
+            }
+    
+            // 显示错误提示
+            saveError.classList.add('show');
+            saveError.style.transform = 'translateY(0)';
+            saveError.style.opacity = '1';
+    
+            // 3秒后隐藏
+            setTimeout(() => {
+                saveError.classList.remove('show');
+                saveError.style.transform = 'translateY(100px)';
+                saveError.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 从后端获取用户信息并更新页面 (使用async/await)
+        async function fetchUserProfileData() {
+            try {
+                // 从localStorage获取用户基本信息
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                
+                if (!userInfo || (!userInfo.phone && !userInfo.email)) {
+                    console.error('找不到用户信息');
+                    showSaveError('无法获取用户信息，请重新登录');
+                    return;
+                }
+                
+                // 构建请求参数
+                const params = new URLSearchParams();
+                if (userInfo.phone) params.append('phone', userInfo.phone);
+                //if (userInfo.email) params.append('email', userInfo.email);
+                
+                // 发送GET请求获取用户详细信息
+                const response = await fetch(`/userProfile?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP响应失败: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 更新页面上的用户信息
+                    updateUserInterface(data.userData);
+                } else {
+                    showSaveError(data.message || '获取用户信息失败');
+                }
+            } catch (error) {
+                console.error('获取用户数据时出错:', error);
+                showSaveError('获取用户信息时发生错误，请稍后再试');
+            }
+        }
+        
+        // 更新界面上的用户信息
+        function updateUserInterface(userData) {
+            // 更新头像和用户名首字母
+            if (userData.name) {
+                const nameInitial = userData.name.charAt(0);
+                document.querySelector('.avatar span').textContent = nameInitial;
+                document.querySelector('#profileAvatar span').textContent = nameInitial;
+                
+                // 如果有头像URL，更新头像
+                if (userData.avatarUrl !== '') {
+                    const profileAvatar = document.getElementById('profileAvatar');
+                    profileAvatar.innerHTML = '';
+                    profileAvatar.style.background = 'none';
+                    
+                    const img = document.createElement('img');
+                    img.src = userData.avatarUrl;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    
+                    const overlay = document.createElement('div');
+                    overlay.className = 'avatar-overlay';
+                    overlay.innerHTML = '<i class="fas fa-camera"></i>';
+                    
+                    profileAvatar.appendChild(img);
+                    profileAvatar.appendChild(overlay);
+                }
+
+                // 更新导航栏头像
+                const navAvatar = document.querySelector('.user-profile .avatar');
+                if(navAvatar) {
+                    navAvatar.innerHTML = '';
+                    const navImg = document.createElement('img');
+                    navImg.src = userData.avatarUrl;
+                    navImg.style.width = '100%';
+                    navImg.style.height = '100%';
+                    navImg.style.borderRadius = '50%';
+                    navImg.style.objectFit = 'cover';
+                    
+                    const navSpan = document.createElement('span');
+                    navSpan.textContent = nameInitial;
+                    
+                    navAvatar.appendChild(navImg);
+                    navAvatar.appendChild(navSpan);
+                }
+            }
+            
+            // 更新个人信息头部
+            document.querySelector('.profile-info h1').textContent = userData.name || '未知';
+            
+            // 更新统计信息
+            const statValues = document.querySelectorAll('.stat-value');
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+            if (userData.registerTime) statValues[0].textContent = formatDate(userData.registerTime);
+            if (userInfo.loginTime) statValues[1].textContent = formatDate(userInfo.loginTime || userData.lastLoginTime);
+            if (userData.bookingCount !== undefined) statValues[2].textContent = userData.bookingCount;
+            
+            // 更新个人信息表单
+            document.getElementById('fullName').value = userData.name || '';
+            document.getElementById('email').value = userData.email || '';
+            document.getElementById('phone').value = userData.phone || '';
+            if (userData.gender) document.getElementById('gender').value = userData.gender;
+            if (userData.birthday) document.getElementById('birthday').value = userData.birthday;
+            if (userData.bio) document.getElementById('bio').value = userData.bio;
+            
+            // 更新偏好设置
+            if (userData.preferences) {
+                // 更新通知设置
+                if (userData.preferences.emailNotification !== undefined) {
+                    document.getElementById('emailToggle').checked = userData.preferences.emailNotification;
+                }
+                if (userData.preferences.smsNotification !== undefined) {
+                    document.getElementById('smsToggle').checked = userData.preferences.smsNotification;
+                }
+                
+                // 更新预约偏好
+                if (userData.preferences.preferredTime) {
+                    document.getElementById('preferredTime').value = userData.preferences.preferredTime;
+                }
+                
+                // 更新其他偏好开关
+                if (userData.preferences.autoConfirm !== undefined) {
+                    document.getElementById('autoConfirmToggle').checked = userData.preferences.autoConfirm;
+                }
+                if (userData.preferences.reminderEnabled !== undefined) {
+                    document.getElementById('reminderToggle').checked = userData.preferences.reminderEnabled;
+                }
+                
+                // 更新偏好服务类别
+                if (userData.preferences.categories && userData.preferences.categories.length > 0) {
+                    let categoriesStr = userData.preferences.categories;
+                    let categories = categoriesStr
+                        .replace(/[\[\]"]/g, '')
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0); // 过滤掉空字符串
+
+                    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => checkbox.checked = false);
+                    checkboxes.forEach(checkbox => {
+                        const category = checkbox.parentElement.textContent.trim();
+                        checkbox.checked = categories.includes(category);
+                    });
+                }
+            }
+            
+            // 更新安全设置
+            if (userData.security) {
+                if (userData.security.smsAuth !== undefined) {
+                    document.getElementById('smsAuthToggle').checked = userData.security.smsAuth;
+                }
+                if (userData.security.loginAlert !== undefined) {
+                    document.getElementById('loginAlertToggle').checked = userData.security.loginAlert;
+                }
+            }
+        }
+
+        // 上传头像到服务器
+        async function uploadAvatar(file) {
+            // 从localStorage获取用户基本信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+            if(!userInfo || (!userInfo.phone && !userInfo.email)) {
+                throw new Error('找不到用户信息');
+            }
+
+            // 构建FormData对象
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            // 增加用户标识
+            const param = new URLSearchParams();
+            param.append('phone', userInfo.phone);
+
+            // 发送POST请求上传头像
+            const response = await fetch(`/uploadAvatar?${param.toString()}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            if(!response.ok) {
+                throw new Error(`HTTP响应失败: ${response.status} ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if(data.success){
+                showSaveSuccess();
+                return data.avatarUrl; // 返回头像URL
+            } else {
+                throw new Error(data.message || '头像上传失败');
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 处理感兴趣的服务类别
+        function getCategories() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const categories = [];
+            const allCategories = ['医疗健康', '美容美发', '健身运动'];
+            const selectedStatus = allCategories.map(()=>"");
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const category = checkbox.parentElement.textContent.trim();
+                    const index = allCategories.indexOf(category);
+                    if (index !== -1) {
+                        selectedStatus[index] = category;
+                    }
+                }
+            });
+            return "[" + selectedStatus.join(",") + "]";
+        }
+        
+    </script>
+</body>
+</html>

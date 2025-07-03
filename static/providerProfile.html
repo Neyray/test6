@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务商资料设置 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --tab-active: #667eea;
+            --tab-inactive: #e0e0e0;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+        
+        /* 账户信息头 */
+        .profile-header {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+        
+        .avatar-container {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-container:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .avatar-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-info h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .profile-role {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #667eea;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+        }
+        
+        /* 标签页导航 */
+        .tabs-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            color: var(--text-gray);
+        }
+        
+        .tab-btn.active {
+            color: var(--tab-active);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #f8f9ff;
+            color: #667eea;
+        }
+        
+        /* 标签页内容 */
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--primary-gradient);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* 开关样式 */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .toggle-container:hover {
+            background: #f8f9ff;
+        }
+        
+        .toggle-label {
+            flex: 1;
+        }
+        
+        .toggle-label h4 {
+            margin-bottom: 4px;
+        }
+        
+        .toggle-label p {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: var(--primary-gradient);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* 按钮样式 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: #667eea;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 保存成功动画 */
+        .save-success {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        
+        .save-success.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-stats {
+                justify-content: center;
+            }
+            
+            .tabs-header {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="providerHome.html">服务商中心</a></li>
+                    <li><a href="providerCreate.html">发布预约</a></li>
+                    <li><a href="providerRecords.html">预约记录</a></li>
+                    <li><a href="providerProfile.html" class="active">服务商资料</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>医</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="providerProfile.html"><i class="fas fa-user-md"></i> 服务商资料</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="dashboard-container">
+        <!-- 账户信息头 -->
+        <section class="profile-header">
+            <div class="avatar-container" id="avatarContainer">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span>医</span>
+                    <div class="avatar-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+            </div>
+            
+            <div class="profile-info">
+                <h1>阳光医疗中心</h1>
+                <div class="profile-role">医疗服务商</div>
+                <p>专业医疗服务机构 | 提供全方位健康服务</p>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">注册时间</span>
+                        <span class="stat-value">2024年3月15日</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最后登录</span>
+                        <span class="stat-value">2025年6月29日</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">账户状态</span>
+                        <span class="stat-value">已验证</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 标签页导航 -->
+        <section class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="personal">服务商资料</button>
+                <button class="tab-btn" data-tab="security">安全设置</button>
+                <button class="tab-btn" data-tab="notifications">通知偏好</button>
+            </div>
+            
+            <!-- 服务商资料标签页 -->
+            <div class="tab-content active" id="personalTab">
+                <h2 class="section-title">服务商资料设置</h2>
+                
+                <form id="personalForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> 电子邮箱</label>
+                            <input type="email" id="email" value="service@yangguang-medical.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone"><i class="fas fa-phone"></i> 联系电话</label>
+                            <input type="tel" id="phone" value="400-123-4567">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="organization"><i class="fas fa-building"></i> 机构名称</label>
+                            <input type="text" id="organization" value="阳光医疗中心">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="specialty"><i class="fas fa-stethoscope"></i> 服务领域</label>
+                            <input type="text" id="specialty" value="内科、外科、健康管理、体检服务">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address"><i class="fas fa-map-marker-alt"></i> 机构地址</label>
+                            <input type="text" id="address" value="北京市朝阳区建国路88号">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessHours"><i class="fas fa-clock"></i> 营业时间</label>
+                            <input type="text" id="businessHours" value="周一至周日 8:00-20:00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio"><i class="fas fa-file-alt"></i> 机构简介</label>
+                        <textarea id="bio" rows="4">阳光医疗中心成立于2010年，是一家集医疗、预防、康复为一体的综合性医疗机构。拥有先进的医疗设备和专业的医护团队，致力于为患者提供优质、安全、便捷的医疗服务。</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 安全设置标签页 -->
+            <div class="tab-content" id="securityTab">
+                <h2 class="section-title">账户安全设置</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currentPassword"><i class="fas fa-lock"></i> 当前密码</label>
+                        <input type="password" id="currentPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword"><i class="fas fa-key"></i> 新密码</label>
+                        <input type="password" id="newPassword">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword"><i class="fas fa-key"></i> 确认新密码</label>
+                        <input type="password" id="confirmPassword">
+                    </div>
+                </div>
+                
+                <div class="password-strength">
+                    <div class="strength-meter">
+                        <div class="strength-bar weak"></div>
+                    </div>
+                    <div class="strength-text">密码强度: 弱</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="changePasswordBtn">
+                        <i class="fas fa-sync-alt"></i> 更改密码
+                    </button>
+                </div>
+                
+                <h3 class="section-title" style="margin-top: 2rem;">双重认证</h3>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>启用双重认证 (2FA)</h4>
+                        <p>为您的账户增加额外安全层</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="twoFactorToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>登录验证</h4>
+                        <p>每次登录需要短信验证码</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsAuthToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存安全设置
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 通知偏好标签页 -->
+            <div class="tab-content" id="notificationsTab">
+                <h2 class="section-title">通知偏好设置</h2>
+                
+                <h3>通知渠道</h3>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>电子邮件通知</h4>
+                        <p>接收重要账户通知和更新</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="emailToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>短信通知</h4>
+                        <p>接收预约提醒和重要通知</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="smsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>站内消息</h4>
+                        <p>接收系统通知和更新</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="inAppToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <h3 class="section-title" style="margin-top: 2rem;">通知类型</h3>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>新预约通知</h4>
+                        <p>当有新预约时通知我</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="newAppointmentToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>预约变更通知</h4>
+                        <p>当预约时间变更时通知我</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="changeAppointmentToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>评价通知</h4>
+                        <p>当收到新评价时通知我</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reviewToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="toggle-container">
+                    <div class="toggle-label">
+                        <h4>系统更新通知</h4>
+                        <p>接收平台更新和维护通知</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="systemUpdateToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveNotificationsBtn">
+                        <i class="fas fa-save"></i> 保存偏好设置
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+    
+    <!-- 保存成功提示 -->
+    <div class="save-success" id="saveSuccess">
+        <i class="fas fa-check-circle"></i>
+        <span>设置已成功保存！</span>
+    </div>
+
+    <script>
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取服务商信息并更新页面
+            fetchProviderProfileData();
+            
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 标签页切换
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // 添加当前按钮的active类
+                    this.classList.add('active');
+                    
+                    // 显示对应的标签页内容
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // 头像上传（本地预览和上传到服务器）
+            const avatarContainer = document.getElementById('avatarContainer');
+            const avatarUpload = document.getElementById('avatarUpload');
+            
+            avatarContainer.addEventListener('click', function() {
+                avatarUpload.click();
+            });
+            
+            avatarUpload.addEventListener('change', async function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    
+                    // 检查文件大小（限制为5MB）
+                    if (file.size > 5 * 1024 * 1024) {
+                        showSaveError('文件大小不能超过5MB');
+                        return;
+                    }
+                    
+                    // 检查文件类型
+                    if (!file.type.startsWith('image/')) {
+                        showSaveError('请选择图片文件');
+                        return;
+                    }
+                    
+                    // 本地预览
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const avatarElements = [
+                            document.querySelector('.profile-avatar'),
+                            document.querySelector('.user-profile .avatar')
+                        ];
+                        
+                        avatarElements.forEach(element => {
+                            if (element) {
+                                element.innerHTML = `<img src="${event.target.result}" alt="头像" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // 上传到服务器
+                    try {
+                        const avatarUrl = await uploadAvatar(file);
+                        if (avatarUrl) {
+                            showSaveSuccess('头像上传成功！');
+                        }
+                    } catch (error) {
+                        console.error('头像上传失败:', error);
+                        showSaveError('头像上传失败，请稍后再试');
+                    }
+                }
+            });
+            
+            // 更新服务商资料
+            const personalForm = document.getElementById('personalForm');
+            personalForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                try {
+                    // 获取表单数据
+                    const formData = {
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        organization: document.getElementById('organization').value,
+                        specialty: document.getElementById('specialty').value,
+                        address: document.getElementById('address').value,
+                        businessHours: document.getElementById('businessHours').value,
+                        bio: document.getElementById('bio').value
+                    };
+
+                    // 简单验证
+                    if (!formData.email || !formData.phone || !formData.organization) {
+                        showSaveError('请填写必填信息');
+                        return;
+                    }
+
+                    // 获取用户标识
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    if (!userInfo || !userInfo.phone) {
+                        showSaveError('用户信息不完整，请重新登录');
+                        return;
+                    }
+
+                    // 构建请求数据
+                    const requestData = {
+                        phone: userInfo.phone,
+                        ...formData
+                    };
+
+                    // 发送请求
+                    const response = await fetch('/updateUserProfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSaveSuccess('服务商资料更新成功！');
+                        
+                        // 更新页面标题
+                        if (formData.organization) {
+                            document.querySelector('.profile-info h1').textContent = formData.organization;
+                        }
+                    } else {
+                        showSaveError(data.message || '更新失败，请稍后再试');
+                    }
+                } catch (error) {
+                    console.error('更新服务商资料时出错:', error);
+                    showSaveError('更新失败，请检查网络连接后重试');
+                }
+            });
+            
+            // 保存通知偏好设置
+            const saveNotificationsBtn = document.getElementById('saveNotificationsBtn');
+            if (saveNotificationsBtn) {
+                saveNotificationsBtn.addEventListener('click', async function() {
+                    try {
+                        // 获取通知设置
+                        const notificationData = {
+                            emailNotification: document.getElementById('emailToggle').checked,
+                            smsNotification: document.getElementById('smsToggle').checked,
+                            inAppNotification: document.getElementById('inAppToggle').checked,
+                            appointmentReminder: document.getElementById('appointmentReminderToggle')?.checked || false,
+                            systemUpdate: document.getElementById('systemUpdateToggle')?.checked || false,
+                            promotionNotification: document.getElementById('promotionToggle')?.checked || false
+                        };
+
+                        // 获取用户标识
+                        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                        if (!userInfo || !userInfo.phone) {
+                            showSaveError('用户信息不完整，请重新登录');
+                            return;
+                        }
+
+                        // 构建请求数据
+                        const requestData = {
+                            phone: userInfo.phone,
+                            preferences: notificationData
+                        };
+
+                        // 发送请求
+                        const response = await fetch('/saveUserNotifications', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(requestData)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            showSaveSuccess('通知偏好设置保存成功！');
+                        } else {
+                            showSaveError(data.message || '保存失败，请稍后再试');
+                        }
+                    } catch (error) {
+                        console.error('保存通知偏好时出错:', error);
+                        showSaveError('保存失败，请检查网络连接后重试');
+                    }
+                });
+            }
+            
+            // 更改密码
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            changePasswordBtn.addEventListener('click', async function() {
+                const currentPass = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirmPass = document.getElementById('confirmPassword').value;
+                
+                if (!currentPass || !newPass || !confirmPass) {
+                    showSaveError('请填写完整的密码信息');
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    showSaveError('新密码与确认密码不一致');
+                    return;
+                }
+                
+                if (newPass.length < 8) {
+                    showSaveError('新密码长度至少8位');
+                    return;
+                }
+
+                // 获取用户标识
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if (!userInfo || !userInfo.phone) {
+                    showSaveError('用户信息不完整，请重新登录');
+                    return;
+                }
+
+                // 构建请求数据
+                const userPasswordData = {
+                    identifier: userInfo.phone,
+                    currentPassword: currentPass,
+                    newPassword: newPass
+                };
+                
+                try {
+                    const response = await fetch('/changePassword', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userPasswordData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSaveSuccess('密码修改成功！');
+                        
+                        // 清空密码框
+                        document.getElementById('currentPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmPassword').value = '';
+                    } else {
+                        showSaveError(data.message || '密码修改失败，请检查当前密码是否正确');
+                    }
+                } catch (error) {
+                    console.error('修改密码时出错:', error);
+                    showSaveError('密码修改失败，请检查网络连接后重试');
+                }
+            });
+            
+            // 密码强度检测
+            const newPassword = document.getElementById('newPassword');
+            if (newPassword) {
+                newPassword.addEventListener('input', function() {
+                    const strength = checkPasswordStrength(this.value);
+                    updatePasswordStrengthUI(strength);
+                });
+            }
+
+            // 退出登录
+            const logoutBtn = document.querySelector('a[href="#"]');
+            if (logoutBtn && logoutBtn.textContent.includes('退出登录')) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // 清除本地存储的用户信息
+                    localStorage.removeItem('userInfo');
+                    
+                    // 跳转到登录页面
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+        
+        // 显示保存成功提示
+        function showSaveSuccess(message = '设置保存成功！') {
+            const saveSuccess = document.getElementById('saveSuccess');
+            saveSuccess.querySelector('span').textContent = message;
+            saveSuccess.classList.add('show');
+            
+            setTimeout(() => {
+                saveSuccess.classList.remove('show');
+            }, 3000);
+        }
+
+        // 显示保存失败提示
+        function showSaveError(errorMessage = '设置保存失败！') {
+            // 创建保存失败提示元素
+            let saveError = document.getElementById('saveError');
+    
+            if (!saveError) {
+                saveError = document.createElement('div');
+                saveError.id = 'saveError';
+                saveError.className = 'save-error';
+                saveError.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>${errorMessage}</span>
+                `;
+        
+                // 添加样式
+                saveError.style.position = 'fixed';
+                saveError.style.bottom = '20px';
+                saveError.style.right = '20px';
+                saveError.style.background = '#dc3545';
+                saveError.style.color = 'white';
+                saveError.style.padding = '15px 25px';
+                saveError.style.borderRadius = '8px';
+                saveError.style.display = 'flex';
+                saveError.style.alignItems = 'center';
+                saveError.style.gap = '10px';
+                saveError.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.15)';
+                saveError.style.transform = 'translateY(100px)';
+                saveError.style.opacity = '0';
+                saveError.style.transition = 'all 0.4s ease';
+                saveError.style.zIndex = '1000';
+        
+                document.body.appendChild(saveError);
+            } else {
+                // 更新错误消息
+                saveError.querySelector('span').textContent = errorMessage;
+            }
+    
+            // 显示错误提示
+            saveError.classList.add('show');
+            saveError.style.transform = 'translateY(0)';
+            saveError.style.opacity = '1';
+    
+            // 3秒后隐藏
+            setTimeout(() => {
+                saveError.classList.remove('show');
+                saveError.style.transform = 'translateY(100px)';
+                saveError.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 从后端获取服务商信息并更新页面 (使用async/await)
+        async function fetchProviderProfileData() {
+            try {
+                // 从localStorage获取用户基本信息
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                
+                if (!userInfo || (!userInfo.phone && !userInfo.email)) {
+                    showSaveError('找不到用户信息');
+                    return;
+                }
+                
+                // 构建请求参数
+                const params = new URLSearchParams();
+                if (userInfo.phone) params.append('phone', userInfo.phone);
+                
+                // 发送GET请求获取服务商详细信息（复用userProfile端口）
+                const response = await fetch(`/userProfile?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateProviderInterface(data.userData);
+                } else {
+                    showSaveError(data.message || '获取服务商信息失败');
+                }
+            } catch (error) {
+                console.error('获取服务商数据时出错:', error);
+                showSaveError('获取服务商信息时发生错误，请稍后再试');
+            }
+        }
+        
+        // 更新界面上的服务商信息
+        function updateProviderInterface(userData) {
+            // 更新头像和机构名首字母
+            if (userData.name) {
+                const displayName = userData.name;
+                const nameInitial = displayName.charAt(0);
+                
+                // 更新页面头像
+                const avatarElements = document.querySelectorAll('.avatar span, #profileAvatar span');
+                avatarElements.forEach(element => {
+                    if (element) element.textContent = nameInitial;
+                });
+                
+                // 如果有头像URL，更新头像
+                if (userData.avatarUrl && userData.avatarUrl !== '') {
+                    const avatarContainers = [
+                        document.querySelector('#profileAvatar'),
+                        document.querySelector('.user-profile .avatar')
+                    ];
+                    
+                    avatarContainers.forEach(container => {
+                        if (container) {
+                            container.innerHTML = `<img src="${userData.avatarUrl}" alt="头像" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        }
+                    });
+                }
+            }
+            
+            // 更新服务商信息头部
+            document.querySelector('.profile-info h1').textContent = userData.name || '未知机构';
+            
+            // 更新统计信息
+            const statValues = document.querySelectorAll('.stat-value');
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+            if (userData.registerTime) statValues[0].textContent = formatDate(userData.registerTime);
+            if (userInfo.loginTime || userData.lastLoginTime) statValues[1].textContent = formatDate(userInfo.loginTime || userData.lastLoginTime);
+            // 服务商状态显示为已验证或待审核
+            if (statValues[2]) statValues[2].textContent = userData.verified ? '已验证' : '待审核';
+            
+            // 更新服务商资料表单
+            if (document.getElementById('email')) document.getElementById('email').value = userData.email || '';
+            if (document.getElementById('phone')) document.getElementById('phone').value = userData.phone || '';
+            if (document.getElementById('organization')) document.getElementById('organization').value = userData.name || '';
+            if (document.getElementById('specialty')) document.getElementById('specialty').value = userData.specialty || '';
+            if (document.getElementById('address')) document.getElementById('address').value = userData.address || '';
+            if (document.getElementById('businessHours')) document.getElementById('businessHours').value = userData.businessHours || '';
+            if (document.getElementById('bio')) document.getElementById('bio').value = userData.bio || '';
+            
+            // 更新通知偏好设置
+            if (userData.preferences) {
+                // 更新通知设置
+                if (userData.preferences.emailNotification !== undefined) {
+                    const emailToggle = document.getElementById('emailToggle');
+                    if (emailToggle) emailToggle.checked = userData.preferences.emailNotification;
+                }
+                if (userData.preferences.smsNotification !== undefined) {
+                    const smsToggle = document.getElementById('smsToggle');
+                    if (smsToggle) smsToggle.checked = userData.preferences.smsNotification;
+                }
+                if (userData.preferences.inAppNotification !== undefined) {
+                    const inAppToggle = document.getElementById('inAppToggle');
+                    if (inAppToggle) inAppToggle.checked = userData.preferences.inAppNotification;
+                }
+            }
+            
+            // 更新安全设置
+            if (userData.security) {
+                if (userData.security.twoFactorEnabled !== undefined) {
+                    const twoFactorToggle = document.getElementById('twoFactorToggle');
+                    if (twoFactorToggle) twoFactorToggle.checked = userData.security.twoFactorEnabled;
+                }
+                if (userData.security.smsAuthEnabled !== undefined) {
+                    const smsAuthToggle = document.getElementById('smsAuthToggle');
+                    if (smsAuthToggle) smsAuthToggle.checked = userData.security.smsAuthEnabled;
+                }
+            }
+        }
+
+        // 上传头像到服务器（复用userProfile端口）
+        async function uploadAvatar(file) {
+            // 从localStorage获取用户基本信息
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+            if(!userInfo || (!userInfo.phone && !userInfo.email)) {
+                throw new Error('用户信息不完整，请重新登录');
+            }
+
+            // 构建FormData对象
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            // 添加用户标识
+            const param = new URLSearchParams();
+            param.append('phone', userInfo.phone);
+
+            // 发送POST请求上传头像
+            const response = await fetch(`/uploadAvatar?${param.toString()}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if(!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if(data.success){
+                return data.avatarUrl; // 返回头像URL
+            } else {
+                throw new Error(data.message || '头像上传失败');
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 检查密码强度
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            return strength;
+        }
+
+        // 更新密码强度UI
+        function updatePasswordStrengthUI(strength) {
+            const strengthBar = document.querySelector('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+            
+            if (!strengthBar || !strengthText) return;
+            
+            // 移除所有强度类
+            strengthBar.className = 'strength-bar';
+            
+            let text = '';
+            switch (strength) {
+                case 0:
+                case 1:
+                    strengthBar.classList.add('weak');
+                    text = '密码强度: 弱';
+                    break;
+                case 2:
+                case 3:
+                    strengthBar.classList.add('medium');
+                    text = '密码强度: 中等';
+                    break;
+                case 4:
+                case 5:
+                    strengthBar.classList.add('strong');
+                    text = '密码强度: 强';
+                    break;
+            }
+            
+            strengthText.textContent = text;
+        }
+    </script>
+</body>
+</html>

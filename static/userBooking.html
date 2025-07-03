@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约中心 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 - 复用用户中心样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .booking-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 5%;
+        }
+        
+        .page-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* 搜索筛选区 */
+        .filters-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-group label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+        
+        select, input {
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .search-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .search-btn i {
+            margin-right: 8px;
+        }
+        
+        /* 服务网格 */
+        .services-section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+        
+        .results-count {
+            color: var(--text-gray);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .service-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        
+        .service-category {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        
+        .service-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stars {
+            color: #ffc107;
+            margin-right: 8px;
+        }
+        
+        .rating-value {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .reviews {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+        
+        .service-description {
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .service-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .book-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .book-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+        
+        .pagination ul {
+            display: flex;
+            list-style: none;
+            background: white;
+            border-radius: 50px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .pagination li {
+            margin: 0 5px;
+        }
+        
+        .pagination a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .pagination a:hover, .pagination a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .booking-modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: translateY(-30px);
+            transition: var(--transition);
+            opacity: 0;
+        }
+        
+        .modal-overlay.active .booking-modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .service-info {
+            display: flex;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-details h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-details .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .modal-form input, .modal-form select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .time-slot:hover, .time-slot.selected {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+        }
+        
+        .confirm-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .confirm-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 付款模态框额外样式 */
+        .payment-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .summary-row.total {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-top: 5px;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        
+        /* 支付按钮动画 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #confirmPayment:hover {
+            animation: pulse 1s infinite;
+        }
+
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .services-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .service-info {
+                flex-direction: column;
+            }
+            
+            .modal-image {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="userHome.html">用户中心</a></li>
+                    <li><a href="userBooking.html" class="active">预约中心</a></li>
+                    <li><a href="userRecords.html">预约记录</a></li>
+                    <li><a href="userReviews.html">评价中心</a></li>
+                    <li><a href="userProfile.html">个人设置</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>张</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="userProfile.html"><i class="fas fa-user-circle"></i> 个人资料</a></li>
+                        <li><a href="userCoupons.html"><i class="fas fa-ticket"></i> 优惠券</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="booking-container">
+        <div class="page-header">
+            <h1>预约服务中心</h1>
+            <p>探索各种专业服务，轻松预约您需要的时间和地点</p>
+        </div>
+        
+        <!-- 搜索筛选区 -->
+        <section class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-list"></i> 服务分类</label>
+                    <select id="serviceCategory">
+                        <option value="">所有分类</option>
+                        <option value="医疗">医疗服务</option>
+                        <option value="美容">美容服务</option>
+                        <option value="健身">健身服务</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-alt"></i> 日期范围</label>
+                    <input type="text" id="dateRange" placeholder="选择日期范围">
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-map-marker-alt"></i> 位置</label>
+                    <input type="text" id="location" placeholder="输入城市或区域">
+                </div>
+            </div>
+            
+            <button class="search-btn" id="searchButton">
+                <i class="fas fa-search"></i> 搜索服务
+            </button>
+        </section>
+        
+        <!-- 服务展示区 -->
+        <section class="services-section">
+            <h2 class="section-title">可用服务</h2>
+            <div class="results-count">找到 <span id="resultsCount">24</span> 个服务</div>
+            
+            <div class="services-grid" id="servicesGrid">
+                <!-- 服务卡片会通过JS动态生成 -->
+            </div>
+            
+            <!-- 分页控件 -->
+            <div class="pagination">
+                <ul>
+                    <li><a href="#"><i class="fas fa-chevron-left"></i></a></li>
+                    <li><a href="#" class="active">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i></a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 预约模态框 -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="booking-modal">
+            <div class="modal-header">
+                <h2>预约服务</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="service-info">
+                    <div class="modal-image">
+                        <img src="https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600" alt="服务图片">
+                    </div>
+                    
+                    <div class="modal-details">
+                        <h3 id="modalServiceName">高级健康体检套餐</h3>
+                        <div class="price">¥<span id="modalPrice">680</span></div>
+                        <div class="service-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-value">4.5</span>
+                            <span class="reviews">(128评价)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form class="modal-form">
+                    <div class="form-group">
+                        <label for="appointmentDate">预约日期</label>
+                        <input type="text" id="appointmentDate" placeholder="选择日期">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>选择时间</label>
+                        <div class="time-slots">
+                            <div class="time-slot">09:00</div>
+                            <div class="time-slot">10:00</div>
+                            <div class="time-slot">11:00</div>
+                            <div class="time-slot">13:00</div>
+                            <div class="time-slot">14:00</div>
+                            <div class="time-slot">15:00</div>
+                            <div class="time-slot">16:00</div>
+                            <div class="time-slot">17:00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">特殊要求</label>
+                        <textarea id="notes" placeholder="请在此输入您的特殊要求或备注信息" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="confirm-btn" id="confirmBooking">
+                    <i class="fas fa-check-circle"></i> 确认预约
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 付款模态框 -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="booking-modal">
+            <div class="modal-header">
+                <h2>确认付款</h2>
+                <button class="close-modal" id="closePaymentModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="service-info">
+                    <div class="modal-image">
+                        <img id="paymentServiceImage" src="" alt="服务图片">
+                    </div>
+                    
+                    <div class="modal-details">
+                        <h3 id="paymentServiceName">服务名称</h3>
+                        <div class="price">¥<span id="paymentPrice">0</span></div>
+                        <p>预约时间: <span id="paymentDateTime">未选择</span></p>
+                    </div>
+                </div>
+                
+                <form class="modal-form">
+                    <div class="form-group">
+                        <label for="paymentMethod">支付方式</label>
+                        <select id="paymentMethod">
+                            <option value="wechat">微信支付</option>
+                            <option value="alipay">支付宝</option>
+                            <option value="card">银行卡支付</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="couponSelect">选择优惠券</label>
+                        <select id="couponSelect">
+                            <option value="">不使用优惠券</option>
+                            <!-- 优惠券选项将通过JavaScript动态生成 -->
+                        </select>
+                    </div>
+                    
+                    <div class="payment-summary">
+                        <div class="summary-row">
+                            <span>服务原价:</span>
+                            <span>¥<span id="originalPrice">0</span></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>优惠金额:</span>
+                            <span>-¥<span id="discountAmount">0</span></span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>应付金额:</span>
+                            <span>¥<span id="finalAmount">0</span></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="confirm-btn" id="confirmPayment">
+                    <i class="fas fa-credit-card"></i> 立即支付
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+
+    <!-- 引入Flatpickr日期选择器库 -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        let pageSize = 6;
+        let currentFilters = {
+            category: '',
+            location: '',
+            startDate: '',
+            endDate: '',
+        };
+        let totalPages = 1;
+        let totalItems = 0;
+        let userCoupons = []; // 用户优惠券数据
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 日期选择器初始化
+            flatpickr("#dateRange", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                locale: "zh"
+            });
+            
+            flatpickr("#appointmentDate", {
+                minDate: "today",
+                dateFormat: "Y-m-d",
+                locale: "zh"
+            });
+            
+            // 页面加载时获取第一页数据和用户优惠券
+            fetchServices(1);
+            fetchUserCoupons();
+            
+            // 搜索按钮事件
+            document.getElementById('searchButton').addEventListener('click', function() {
+                searchServices();
+            });
+            
+            // 时间选择
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+            
+            // 模态框控制
+            const modal = document.getElementById('bookingModal');
+            const paymentModal = document.getElementById('paymentModal');
+            const closeModal = document.getElementById('closeModal');
+            const closePaymentModal = document.getElementById('closePaymentModal');
+            
+            closeModal.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+            
+            closePaymentModal.addEventListener('click', function() {
+                paymentModal.classList.remove('active');
+            });
+            
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+            
+            paymentModal.addEventListener('click', function(e) {
+                if (e.target === paymentModal) {
+                    paymentModal.classList.remove('active');
+                }
+            });
+            
+            // 确认预约按钮 - 打开付款模态框
+            document.getElementById('confirmBooking').addEventListener('click', function() {
+                // 获取预约信息
+                const serviceName = document.getElementById('modalServiceName').textContent;
+                const servicePrice = parseFloat(document.getElementById('modalPrice').textContent);
+                const serviceImg = document.querySelector('.modal-image img').src;
+                
+                // 获取选择的日期和时间
+                const appointmentDate = document.getElementById('appointmentDate').value;
+                const selectedTimeSlot = document.querySelector('.time-slot.selected');
+                const timeSlot = selectedTimeSlot ? selectedTimeSlot.textContent : '未选择';
+                
+                // 验证是否选择了日期和时间
+                if (!appointmentDate) {
+                    showError('请选择预约日期！');
+                    return;
+                }
+                
+                if (!selectedTimeSlot) {
+                    showError('请选择预约时间！');
+                    return;
+                }
+                
+                // 填充付款模态框数据
+                document.getElementById('paymentServiceName').textContent = serviceName;
+                document.getElementById('paymentPrice').textContent = servicePrice;
+                document.getElementById('originalPrice').textContent = servicePrice;
+                document.getElementById('finalAmount').textContent = servicePrice;
+                document.getElementById('paymentDateTime').textContent = `${appointmentDate} ${timeSlot}`;
+                document.getElementById('paymentServiceImage').src = serviceImg;
+                
+                // 根据服务价格过滤优惠券并生成选项
+                updateCouponOptions(servicePrice);
+                
+                // 重置优惠金额
+                document.getElementById('discountAmount').textContent = '0';
+                
+                // 隐藏预约模态框，显示付款模态框
+                modal.classList.remove('active');
+                paymentModal.classList.add('active');
+            });
+            
+            // 优惠券选择逻辑
+            document.getElementById('couponSelect').addEventListener('change', function() {
+                const originalPrice = parseFloat(document.getElementById('originalPrice').textContent);
+                let discountValue = 0;
+                
+                // 如果选择了优惠券，计算折扣金额
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const couponValue = parseFloat(selectedOption.dataset.amount) || 0;
+                    const couponType = selectedOption.dataset.type;
+                    
+                    if (couponType === '折扣券') {
+                        // 折扣券：按折扣计算
+                        discountValue = originalPrice * (1 - couponValue / 10);
+                    } else {
+                        // 减价券：直接减去金额
+                        discountValue = couponValue;
+                    }
+                }
+                
+                // 更新优惠金额和最终金额
+                document.getElementById('discountAmount').textContent = discountValue.toFixed(2);
+                const finalAmount = Math.max(originalPrice - discountValue, 0);
+                document.getElementById('finalAmount').textContent = finalAmount.toFixed(2);
+            });
+            
+            // 支付按钮
+            document.getElementById('confirmPayment').addEventListener('click', async function() {
+                const paymentMethod = document.getElementById('paymentMethod').value;
+                const couponSelect = document.getElementById('couponSelect');
+                const couponId = couponSelect.value;
+                
+                // 收集预约信息
+                const serviceData = {
+                    serviceName: document.getElementById('paymentServiceName').textContent,
+                    appointmentDate: document.getElementById('paymentDateTime').textContent,
+                    price: parseFloat(document.getElementById('finalAmount').textContent),
+                    originalPrice: parseFloat(document.getElementById('originalPrice').textContent),
+                    discountAmount: parseFloat(document.getElementById('discountAmount').textContent) || 0,
+                    couponId: couponId || null,
+                    paymentMethod: paymentMethod,
+                    notes: document.getElementById('notes').value
+                };
+
+                try {
+                    // 添加验证字段
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+                    if(!userInfo || !userInfo.phone){
+                        throw new Error('找不到用户信息');
+                    }
+                    serviceData.identifier = userInfo.phone;
+
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在支付...';
+                    this.disabled = true;
+
+                    // API端点：预约信息提交
+                    const response = await fetch('/bookings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(serviceData)
+                    });
+
+                    if(!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if(data.success) {
+                        // 支付成功
+                        showSuccess('支付成功！您的预约已确认。');
+                        
+                        // 如果使用了优惠券，重新获取优惠券列表
+                        if (couponId) {
+                            fetchUserCoupons();
+                        }
+                        
+                        // 关闭付款模态框
+                        document.getElementById('paymentModal').classList.remove('active');
+                    }else {
+                        // 支付失败
+                        showError(data.message || '支付失败，请稍后重试。');
+                        console.error('支付处理失败:', data.message);
+                    } 
+                }catch (error) {
+                    showError(error.message || '支付过程中发生错误，请稍后重试。');
+                    console.error('支付处理错误:', error);
+                }finally {
+                    //恢复按钮状态
+                    this.innerHTML = '<i class="fas fa-credit-card"></i> 立即支付';
+                    this.disabled = false;
+                }     
+            });
+        });
+
+        // 从后端获取服务数据
+        async function fetchServices(page = 1) {
+            try {
+                // 显示加载状态
+                showLoadingState();
+                
+                // 构建查询参数
+                const params = new URLSearchParams();
+                params.append('page', page);
+                params.append('pageSize', pageSize);
+                
+                // 添加筛选条件
+                if (currentFilters.category) params.append('category', currentFilters.category);
+                if (currentFilters.location) params.append('location', currentFilters.location);
+                if (currentFilters.startDate) params.append('startDate', currentFilters.startDate);
+                if (currentFilters.endDate) params.append('endDate', currentFilters.endDate);
+
+                const response = await fetch(`/services?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // 更新全局变量
+                currentPage = data.pagination.currentPage;
+                totalPages = data.pagination.totalPages;
+                totalItems = data.pagination.totalItems;
+                
+                // 渲染服务列表
+                renderServices(data.services);
+                
+                // 更新分页控件
+                updatePagination();
+                
+                console.log('服务数据加载成功:', data);
+                
+            } catch (error) {
+                console.error('获取服务数据失败:', error);
+                showErrorState('加载服务失败，请刷新页面重试');
+            }
+        }
+        
+        // 搜索服务
+        async function searchServices() {
+            // 获取筛选条件
+            currentFilters.category = document.getElementById('serviceCategory').value;
+            currentFilters.location = document.getElementById('location').value;
+            const dateRange = document.getElementById('dateRange').value.split(' to ');
+            currentFilters.startDate = dateRange[0] ? dateRange[0].trim() : '';
+            currentFilters.endDate = dateRange[1] ? dateRange[1].trim() : '';
+            
+            // 重置到第一页
+            currentPage = 1;
+            
+            // 获取数据
+            await fetchServices(1);
+        }
+        
+        // 显示加载状态
+        function showLoadingState() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+                    <p style="color: #667eea; font-size: 1.1rem;">正在加载服务列表...</p>
+                </div>
+            `;
+        }
+        
+        // 显示错误状态
+        function showErrorState(message) {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e53e3e; margin-bottom: 15px;"></i>
+                    <p style="color: #e53e3e; font-size: 1.1rem; margin-bottom: 20px;">${message}</p>
+                    <button onclick="fetchServices(currentPage)" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">重新加载</button>
+                </div>
+            `;
+        }
+        
+        // 更新分页控件
+        function updatePagination() {
+            const paginationUl = document.querySelector('.pagination ul');
+            paginationUl.innerHTML = '';
+            
+            // 上一页按钮
+            const prevBtn = document.createElement('li');
+            const prevDisabled = currentPage <= 1 ? 'style="opacity: 0.5; pointer-events: none;"' : '';
+            prevBtn.innerHTML = `<a href="#" ${prevDisabled}><i class="fas fa-chevron-left"></i></a>`;
+            if (currentPage > 1) {
+                prevBtn.querySelector('a').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fetchServices(currentPage - 1);
+                });
+            }
+            paginationUl.appendChild(prevBtn);
+            
+            // 计算显示的页码范围
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            // 如果总页数少于5页，显示所有页码
+            if (totalPages <= 5) {
+                startPage = 1;
+                endPage = totalPages;
+            }
+            
+            // 页码按钮
+            for (let i = startPage; i <= endPage; i++) {
+                const pageItem = document.createElement('li');
+                const activeClass = i === currentPage ? 'active' : '';
+                pageItem.innerHTML = `<a href="#" class="${activeClass}">${i}</a>`;
+                
+                pageItem.querySelector('a').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (i !== currentPage) {
+                        fetchServices(i);
+                    }
+                });
+                
+                paginationUl.appendChild(pageItem);
+            }
+            
+            // 下一页按钮
+            const nextBtn = document.createElement('li');
+            const nextDisabled = currentPage >= totalPages ? 'style="opacity: 0.5; pointer-events: none;"' : '';
+            nextBtn.innerHTML = `<a href="#" ${nextDisabled}><i class="fas fa-chevron-right"></i></a>`;
+            if (currentPage < totalPages) {
+                nextBtn.querySelector('a').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    fetchServices(currentPage + 1);
+                });
+            }
+            paginationUl.appendChild(nextBtn);
+            
+            // 更新结果计数
+            document.getElementById('resultsCount').textContent = totalItems;
+        }
+
+        // 渲染服务网格
+        function renderServices(services) {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = '';
+            
+            if (!services || services.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+                        <p style="color: #999; font-size: 1.1rem;">没有找到匹配的服务</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            services.forEach(service => {
+                const delay = Math.random() * 0.3;
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.style.animationDelay = `${delay}s`;
+                
+                card.innerHTML = `
+                    <div class="card-image" style="background-image: url('${service.image}')"></div>
+                    <div class="card-content">
+                        <div class="service-category">${getCategoryName(service.category)}</div>
+                        <h3 class="service-title">${service.title}</h3>
+                        <div class="service-rating">
+                            <div class="stars">
+                                ${renderStars(service.rating)}
+                            </div>
+                            <span class="rating-value">${service.rating}</span>
+                            <span class="reviews">(${service.reviews}评价)</span>
+                        </div>
+                        <p class="service-description">${service.description}</p>
+                        <div class="card-footer">
+                            <div class="service-price">¥${service.price}</div>
+                            <button class="book-btn" data-id="${service.id}">
+                                <i class="fas fa-calendar-plus"></i> 立即预约
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            // 添加预约按钮事件
+            document.querySelectorAll('.book-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const serviceId = this.getAttribute('data-id');
+                    // 这里需要从已加载的服务中找到对应的服务
+                    // 暂时使用模拟数据，后续可以存储在全局变量中
+                    const service = {
+                        id: serviceId,
+                        title: this.closest('.service-card').querySelector('.service-title').textContent,
+                        price: this.closest('.service-card').querySelector('.service-price').textContent.replace('¥', ''),
+                        image: this.closest('.service-card').querySelector('.card-image').style.backgroundImage.slice(5, -2)
+                    };
+                    openBookingModal(service);
+                });
+            });
+        }
+        
+        // 打开预约模态框
+        function openBookingModal(service) {
+            document.getElementById('modalServiceName').textContent = service.title;
+            document.getElementById('modalPrice').textContent = service.price;
+            
+            // 更新模态框中的图片
+            const modalImg = document.querySelector('#bookingModal .modal-image img');
+            if (service.image) {
+                modalImg.src = service.image;
+            }
+            
+            const modal = document.getElementById('bookingModal');
+            modal.classList.add('active');
+        }
+        
+        // 根据分类代码获取分类名称
+        function getCategoryName(categoryCode) {
+            const categories = {
+                medical: '医疗服务',
+                beauty: '美容服务',
+                fitness: '健身服务',
+            };
+            return categories[categoryCode] || '其他服务';
+        }
+        
+        // 渲染评分星星
+        function renderStars(rating) {
+            let stars = '';
+            const fullStars = Math.floor(rating);
+            const halfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (halfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        // 成功提示
+        function showSuccess(message = '操作成功！') {
+            // 创建或获取成功提示元素
+            let successToast = document.getElementById('successToast');
+    
+            if (!successToast) {
+                successToast = document.createElement('div');
+                successToast.id = 'successToast';
+                successToast.className = 'toast toast-success';
+                successToast.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span class="toast-message">${message}</span>
+                `;
+        
+                // 添加样式
+                Object.assign(successToast.style, {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    background: '#4caf50',
+                    color: 'white',
+                    padding: '15px 25px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.15)',
+                    transform: 'translateY(100px)',
+                    opacity: '0',
+                    transition: 'all 0.4s ease',
+                    zIndex: '1000',
+                    maxWidth: '350px',
+                    wordWrap: 'break-word'
+                });
+        
+                document.body.appendChild(successToast);
+            } else {
+                // 更新消息内容
+                successToast.querySelector('.toast-message').textContent = message;
+            }
+    
+            // 显示成功提示
+            successToast.classList.add('show');
+            successToast.style.transform = 'translateY(0)';
+            successToast.style.opacity = '1';
+    
+            // 3秒后隐藏
+            setTimeout(() => {
+                successToast.classList.remove('show');
+                successToast.style.transform = 'translateY(100px)';
+                successToast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 错误提示
+        function showError(message = '操作失败，请重试！') {
+            // 创建或获取错误提示元素
+            let errorToast = document.getElementById('errorToast');
+    
+            if (!errorToast) {
+                errorToast = document.createElement('div');
+                errorToast.id = 'errorToast';
+                errorToast.className = 'toast toast-error';
+                errorToast.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="toast-message">${message}</span>
+                `;
+        
+                // 添加样式
+                Object.assign(errorToast.style, {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    background: '#f44336',
+                    color: 'white',
+                    padding: '15px 25px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.15)',
+                    transform: 'translateY(100px)',
+                    opacity: '0',
+                    transition: 'all 0.4s ease',
+                    zIndex: '1000',
+                    maxWidth: '350px',
+                    wordWrap: 'break-word'
+                });
+        
+                document.body.appendChild(errorToast);
+            } else {
+                // 更新消息内容
+                errorToast.querySelector('.toast-message').textContent = message;
+            }
+    
+            // 显示错误提示
+            errorToast.classList.add('show');
+            errorToast.style.transform = 'translateY(0)';
+            errorToast.style.opacity = '1';
+    
+            // 3秒后隐藏
+            setTimeout(() => {
+                errorToast.classList.remove('show');
+                errorToast.style.transform = 'translateY(100px)';
+                errorToast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // 获取用户优惠券
+        async function fetchUserCoupons() {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+                if (!userInfo.phone) {
+                    console.warn('找不到用户信息，跳过优惠券加载');
+                    return;
+                }
+
+                const params = new URLSearchParams();
+                params.append('phone', userInfo.phone);
+
+                const response = await fetch(`/coupons?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success && Array.isArray(data.coupons)) {
+                    // 只保留可用的优惠券
+                    userCoupons = data.coupons.filter(coupon => coupon.status === 'AVAILABLE');
+                    console.log('优惠券加载成功:', userCoupons);
+                } else {
+                    console.error('获取优惠券失败:', data.message);
+                }
+            } catch (error) {
+                console.error('获取优惠券错误:', error);
+            }
+        }
+
+        // 根据服务价格更新优惠券选项
+        function updateCouponOptions(servicePrice) {
+            const couponSelect = document.getElementById('couponSelect');
+            couponSelect.innerHTML = '<option value="">不使用优惠券</option>';
+            
+            // 如果没有优惠券数据，返回
+            if (!userCoupons || userCoupons.length === 0) {
+                return;
+            }
+            
+            // 筛选可用于当前价格的优惠券
+            const availableCoupons = userCoupons.filter(coupon => {
+                // 假设优惠券有minAmount属性表示满多少可用
+                if (coupon.minAmount && servicePrice < coupon.minAmount) {
+                    return false;
+                }
+                return true;
+            });
+            
+            // 添加优惠券选项
+            availableCoupons.forEach(coupon => {
+                const option = document.createElement('option');
+                option.value = coupon.id;
+                option.dataset.amount = coupon.value; // 存储优惠金额
+                option.dataset.type = coupon.type; // 存储优惠券类型
+                
+                // 根据优惠券类型显示不同的文本
+                const valueText = coupon.type === '折扣券' ? `${coupon.value}折` : `减${coupon.value}元`;
+                option.textContent = `${coupon.title} - ${valueText}`;
+                
+                couponSelect.appendChild(option);
+            });
+        }
+    </script>
+</body>
+</html>

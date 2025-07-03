@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Service Center</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .nav-left {
+            display: flex;
+            gap: 1rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0;
+        }
+        .dashboard-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+         .search-container {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    #results {
+        margin-top: 1rem;
+    }
+        /* 其他原有样式保持不变 */
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="nav-left">
+            <div class="button-group">
+                <button onclick="location.href='/dashboard'">首页</button>
+                <button onclick="location.href='/service'">服务中心</button>
+                <button onclick="location.href='/record'">记录</button>
+                <button onclick="location.href='/time'">时间管理</button>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button onclick="location.href='/user'">用户</button>
+        </div>
+    </div>
+
+    
+
+    <!-- 新增预约服务搜索 -->
+    <!-- 在搜索表单中添加新字段 -->
+<!-- 新增预约服务搜索 -->
+<div class="search-container">
+    <h2>Search Services</h2>
+    <form id="searchForm" method="get" action="/svc_search">
+        <div>
+            <label for="serviceType">Service Type:</label>
+            <select id="serviceType" name="service_type">
+                <option value="">All Types</option>
+                <option value="医疗">医疗</option>
+                <option value="美容">美容</option>
+                <option value="健身">健身</option>
+            </select>
+        </div>
+        <div>
+    <label for="priceRange">Price Range:</label>
+    <select id="priceRange" name="price_range">
+        <option value="">All Prices</option>
+        <option value="0-100">100元以下</option>
+        <option value="100-300">100-300元</option>
+        <option value="500-1000">500-1000元</option>
+        <option value="1000+">1000元以上</option>
+    </select>
+</div>
+        <div>
+            <label for="startDate">Start Date:</label>
+            <input type="datetime-local" id="startDate" name="start_date">
+        </div>
+        <div>
+            <label for="endDate">End Date:</label>
+            <input type="datetime-local" id="endDate" name="end_date">
+        </div>
+        
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+</div>
+</div>
+</body>
+</html>

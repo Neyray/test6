@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约记录 - 预约系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea, #764ba2);
+            --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --text-gray: #666666;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        /* 头部样式 - 复用用户中心样式 */
+        header {
+            background: white;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav li {
+            margin: 0 15px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover, nav a.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 10;
+        }
+        
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+        }
+        
+        .dropdown-menu li {
+            padding: 12px 20px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-menu li:hover {
+            background: #f1f5ff;
+        }
+        
+        .dropdown-menu a {
+            text-decoration: none;
+            color: var(--text-dark);
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        /* 主内容区 */
+        .records-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 5%;
+        }
+        
+        .page-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* 状态筛选栏 */
+        .status-filters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 2.5rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .filter-tab {
+            padding: 10px 25px;
+            border-radius: 50px;
+            background: #f0f3ff;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-tab:hover {
+            background: #e0e7ff;
+        }
+        
+        .filter-tab.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .filter-tab .count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        /* 批量操作区 */
+        .batch-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .select-all {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .select-all input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .action-btn.export {
+            background: #4caf50;
+            color: white;
+            border: none;
+        }
+        
+        .action-btn.cancel {
+            background: #f44336;
+            color: white;
+            border: none;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 时间线记录列表 */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+        
+        /* 时间线中心线 */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 2px;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        
+        .record-item {
+            position: relative;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+            animation: fadeInUp 0.6s forwards;
+            z-index: 2;
+        }
+        
+        .record-item.removing {
+            animation: slideOut 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .record-item:nth-child(odd) {
+            padding-right: 50%;
+            padding-left: 30px;
+        }
+        
+        .record-item:nth-child(even) {
+            padding-left: 50%;
+            padding-right: 30px;
+        }
+        
+        .record-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .record-date {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0f3ff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .record-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .record-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-right: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .record-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .record-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .record-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-gray);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .status-pending {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        
+        .status-confirmed {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .status-completed {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+        
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+        
+        .record-details {
+            margin: 1.5rem 0;
+            padding: 1.2rem;
+            background: #f9f9ff;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            width: 120px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: var(--text-gray);
+        }
+        
+        .record-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .record-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .record-btn.cancel {
+            border-color: #f44336;
+            color: #f44336;
+        }
+        
+        .record-btn.reschedule {
+            border-color: #2196f3;
+            color: #2196f3;
+        }
+        
+        .record-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .record-btn.cancel:hover {
+            background: #f44336;
+            color: white;
+        }
+        
+        .record-btn.reschedule:hover {
+            background: #2196f3;
+            color: white;
+        }
+        
+        /* 时间线节点 */
+        .record-item::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #667eea;
+            top: 30px;
+            z-index: 3;
+        }
+        
+        .record-item:nth-child(odd)::before {
+            right: -10px;
+        }
+        
+        .record-item:nth-child(even)::before {
+            left: -10px;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 3rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav {
+                margin: 1.5rem 0;
+            }
+            
+            .timeline::before {
+                left: 30px;
+            }
+            
+            .record-item:nth-child(odd),
+            .record-item:nth-child(even) {
+                padding: 0 0 0 70px;
+            }
+            
+            .record-item::before {
+                left: 20px;
+            }
+            
+            .record-date {
+                position: static;
+                margin-bottom: 10px;
+            }
+            
+            .record-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .record-image {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+            
+            .record-actions {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            nav li {
+                margin: 5px;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .status-filters {
+                justify-content: flex-start;
+            }
+            
+            .filter-tab {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .batch-actions {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .record-item {
+                padding-left: 50px !important;
+                padding-right: 15px !important;
+            }
+            
+            .record-item::before {
+                left: 10px;
+            }
+            
+            .record-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .record-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .record-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部区域 -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-calendar-check"></i>
+                <h1>预约管理系统</h1>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="userHome.html">用户中心</a></li>
+                    <li><a href="userBooking.html">预约中心</a></li>
+                    <li><a href="userRecords.html" class="active">预约记录</a></li>
+                    <li><a href="userReviews.html">评价中心</a></li>
+                    <li><a href="userProfile.html">个人设置</a></li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile" id="userProfile">
+                <div class="avatar">
+                    <span>张</span>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <ul>
+                        <li><a href="userProfile.html"><i class="fas fa-user-circle"></i> 个人资料</a></li>
+                        <li><a href="#"><i class="fas fa-ticket"></i> 优惠卷</a></li>
+                        <li><a href="#"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="records-container">
+        <div class="page-header">
+            <h1>我的预约记录</h1>
+            <p>查看和管理您所有的预约历史记录</p>
+        </div>
+        
+        <!-- 状态筛选栏 -->
+        <section class="status-filters">
+            <button class="filter-tab active" data-status="all">
+                <i class="fas fa-list"></i> 全部
+                <span class="count">12</span>
+            </button>
+            <button class="filter-tab" data-status="pending">
+                <i class="fas fa-clock"></i> 待确认
+                <span class="count">2</span>
+            </button>
+            <button class="filter-tab" data-status="confirmed">
+                <i class="fas fa-check-circle"></i> 已预约
+                <span class="count">5</span>
+            </button>
+            <button class="filter-tab" data-status="completed">
+                <i class="fas fa-calendar-check"></i> 已完成
+                <span class="count">4</span>
+            </button>
+            <button class="filter-tab" data-status="cancelled">
+                <i class="fas fa-times-circle"></i> 已取消
+                <span class="count">1</span>
+            </button>
+        </section>
+        
+        <!-- 批量操作区 -->
+        <section class="batch-actions">
+            <div class="select-all">
+                <input type="checkbox" id="selectAll">
+                <label for="selectAll">全选</label>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn export">
+                    <i class="fas fa-file-export"></i> 导出记录 (CSV)
+                </button>
+                <button class="action-btn cancel">
+                    <i class="fas fa-trash-alt"></i> 批量取消
+                </button>
+            </div>
+        </section>
+        
+        <!-- 时间线记录列表 -->
+        <section class="timeline" id="timeline">
+            <!-- 记录项会通过JS动态生成 -->
+        </section>
+    </main>
+
+    <!-- 页脚区域 -->
+    <footer>
+        <p>© 2025 预约系统 - 版权所有</p>
+        <p>Byte Stream | 隐私政策 | 使用条款</p>
+    </footer>
+
+    <script>
+        // 预约记录数据
+        const records = [
+            {
+                id: 1,
+                date: "2025-06-28",
+                service: "高级健康体检套餐",
+                image: "https://images.unsplash.com/photo-1504813184591-01572f98c85f?q=80&w=600",
+                category: "医疗服务",
+                time: "2025-07-05 10:00",
+                location: "市中心医院体检中心",
+                status: "pending",
+                price: 680,
+                provider: "张医生"
+            },
+            {
+                id: 2,
+                date: "2025-06-27",
+                service: "面部深层清洁护理",
+                image: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=600",
+                category: "美容服务",
+                time: "2025-07-02 14:30",
+                location: "美妍美容会所",
+                status: "confirmed",
+                price: 320,
+                provider: "李美容师"
+            },
+            {
+                id: 3,
+                date: "2025-06-25",
+                service: "私人健身训练课程",
+                image: "https://images.unsplash.com/photo-1534367507879-15a4a9d21e11?q=80&w=600",
+                category: "健身服务",
+                time: "2025-06-30 18:00",
+                location: "力健健身房",
+                status: "completed",
+                price: 180,
+                provider: "王教练"
+            },
+            {
+                id: 4,
+                date: "2025-06-24",
+                service: "心理咨询服务",
+                image: "https://images.unsplash.com/photo-1599658880436-444c5a6f90ec?q=80&w=600",
+                category: "咨询服务",
+                time: "2025-06-29 15:00",
+                location: "心灵驿站咨询中心",
+                status: "cancelled",
+                price: 400,
+                provider: "赵心理咨询师"
+            },
+            {
+                id: 5,
+                date: "2025-06-20",
+                service: "牙齿美白护理",
+                image: "https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?q=80&w=600",
+                category: "医疗服务",
+                time: "2025-06-28 11:00",
+                location: "微笑牙科诊所",
+                status: "completed",
+                price: 850,
+                provider: "陈牙医"
+            },
+            {
+                id: 6,
+                date: "2025-06-18",
+                service: "高级瑜伽私教课程",
+                image: "https://images.unsplash.com/photo-1545389336-cf090694435e?q=80&w=600",
+                category: "健身服务",
+                time: "2025-06-25 09:30",
+                location: "静心瑜伽馆",
+                status: "completed",
+                price: 200,
+                provider: "刘瑜伽导师"
+            }
+        ];
+
+        // 状态映射
+        const statusMap = {
+            pending: { text: "待确认", class: "status-pending" },
+            confirmed: { text: "已预约", class: "status-confirmed" },
+            completed: { text: "已完成", class: "status-completed" },
+            cancelled: { text: "已取消", class: "status-cancelled" }
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 用户下拉菜单
+            const userProfile = document.getElementById('userProfile');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            userProfile.addEventListener('click', function() {
+                dropdownMenu.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+            
+            // 渲染时间线记录
+            renderRecords(records);
+            
+            // 状态筛选事件
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const status = this.getAttribute('data-status');
+                    filterRecords(status);
+                });
+            });
+            
+            // 全选功能
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.record-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+            
+            // 导出记录按钮
+            document.querySelector('.action-btn.export').addEventListener('click', function() {
+                alert('导出功能将在实际项目中实现');
+            });
+            
+            // 批量取消按钮
+            document.querySelector('.action-btn.cancel').addEventListener('click', function() {
+                const selectedRecords = document.querySelectorAll('.record-checkbox:checked');
+                if (selectedRecords.length === 0) {
+                    alert('请选择要取消的预约记录');
+                    return;
+                }
+                
+                if (confirm(`确定要取消选中的 ${selectedRecords.length} 条预约记录吗？`)) {
+                    selectedRecords.forEach(checkbox => {
+                        const recordId = checkbox.getAttribute('data-id');
+                        cancelRecord(recordId);
+                    });
+                }
+            });
+        });
+
+        // 渲染时间线记录
+        function renderRecords(records) {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            
+            records.forEach((record, index) => {
+                const delay = index * 0.1;
+                const statusInfo = statusMap[record.status];
+                
+                const recordElement = document.createElement('div');
+                recordElement.className = 'record-item';
+                recordElement.style.animationDelay = `${delay}s`;
+                recordElement.dataset.id = record.id;
+                recordElement.dataset.status = record.status;
+                
+                recordElement.innerHTML = `
+                    <div class="record-card">
+                        <div class="record-date">${record.date}</div>
+                        
+                        <div class="record-header">
+                            <div class="record-image">
+                                <img src="${record.image}" alt="${record.service}">
+                            </div>
+                            
+                            <div class="record-info">
+                                <h3>${record.service}</h3>
+                                <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
+                                
+                                <div class="record-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span>${record.category}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-wallet"></i>
+                                        <span>¥${record.price}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>${record.provider}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="record-details">
+                            <div class="detail-row">
+                                <div class="detail-label">预约时间:</div>
+                                <div class="detail-value">${record.time}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">服务地点:</div>
+                                <div class="detail-value">${record.location}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">预约编号:</div>
+                                <div class="detail-value">RES-${record.id.toString().padStart(4, '0')}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="record-actions">
+                            <div class="select-record">
+                                <input type="checkbox" class="record-checkbox" data-id="${record.id}">
+                                <label>选择</label>
+                            </div>
+                            <button class="record-btn cancel" data-id="${record.id}">
+                                <i class="fas fa-times"></i> 取消预约
+                            </button>
+                            <button class="record-btn reschedule" data-id="${record.id}">
+                                <i class="fas fa-calendar-alt"></i> 申请改期
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                timeline.appendChild(recordElement);
+            });
+            
+            // 添加记录操作事件
+            document.querySelectorAll('.record-btn.cancel').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const recordId = this.getAttribute('data-id');
+                    cancelRecord(recordId);
+                });
+            });
+            
+            document.querySelectorAll('.record-btn.reschedule').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const recordId = this.getAttribute('data-id');
+                    alert(`申请改期功能将在实际项目中实现 - 记录ID: ${recordId}`);
+                });
+            });
+            
+            // 添加记录选择事件
+            document.querySelectorAll('.record-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateSelectAllState();
+                });
+            });
+        }
+        
+        // 取消预约记录
+        function cancelRecord(recordId) {
+            const recordElement = document.querySelector(`.record-item[data-id="${recordId}"]`);
+            if (!recordElement) return;
+            
+            // 添加移除动画
+            recordElement.classList.add('removing');
+            
+            // 模拟API调用
+            setTimeout(() => {
+                // 在实际项目中，这里会调用API取消预约
+                /*
+                fetch(`/api/cancel-booking/${recordId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        recordElement.remove();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+                */
+                
+                // 模拟移除记录
+                recordElement.remove();
+                
+                // 更新筛选计数
+                updateFilterCounts();
+                
+                alert(`预约记录 ${recordId} 已取消`);
+            }, 500);
+        }
+        
+        // 筛选记录
+        function filterRecords(status) {
+            let filtered = records;
+            
+            if (status !== 'all') {
+                filtered = records.filter(record => record.status === status);
+            }
+            
+            renderRecords(filtered);
+        }
+        
+        // 更新筛选计数
+        function updateFilterCounts() {
+            // 在实际项目中，这些计数会从后端获取
+            const counts = {
+                all: records.length,
+                pending: records.filter(r => r.status === 'pending').length,
+                confirmed: records.filter(r => r.status === 'confirmed').length,
+                completed: records.filter(r => r.status === 'completed').length,
+                cancelled: records.filter(r => r.status === 'cancelled').length
+            };
+            
+            document.querySelectorAll('.filter-tab .count').forEach(span => {
+                const status = span.parentElement.getAttribute('data-status');
+                span.textContent = counts[status];
+            });
+        }
+        
+        // 更新全选状态
+        function updateSelectAllState() {
+            const checkboxes = document.querySelectorAll('.record-checkbox');
+            const allChecked = checkboxes.length > 0 && 
+                              Array.from(checkboxes).every(checkbox => checkbox.checked);
+            
+            document.getElementById('selectAll').checked = allChecked;
+        }
+    </script>
+</body>
+</html>
