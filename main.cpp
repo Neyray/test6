@@ -990,7 +990,7 @@ svr.Get("/userHome/getUserData", [](const httplib::Request& req, httplib::Respon
                     
                 };
                 response["username"]= row[1];
-                response["avatar"]= row[4];
+                response["avatar"]= row[4]?row[4]:"";
                 response["pendingAppointments"]= pendingAppointments;
                 response["pendingConfirmations"]= pendingConfirmations;
                 response["completedAppointments"]= completedAppointments;
@@ -1552,10 +1552,10 @@ svr.Post("/changePassword", [](const httplib::Request& req, httplib::Response& r
         res.set_content(
         "{\"success\":false,\"message\":\"密码错误\"}",
         "application/json"
-    );
+        );
     }
-    
-string query_change="UPDATE users SET password = '"+newPassword+"'";
+    else{
+    string query_change="UPDATE users SET password = '"+newPassword+"'";
     for(int i=0;i<identifier.size();i++)
     {
         if(identifier[i]=='@')
@@ -1568,7 +1568,7 @@ string query_change="UPDATE users SET password = '"+newPassword+"'";
             query_change="UPDATE users SET password = '"+newPassword+"' WHERE phone= '"+identifier+"'";
         }
     }
-
+    
     cout<<query_change<<endl;
     json result_change = executeSelectQuery(conn, query_change);
 
@@ -1583,6 +1583,7 @@ string query_change="UPDATE users SET password = '"+newPassword+"'";
         "{\"success\":true,\"message\":\"用户信息更新成功\"}",
         "application/json"
     );
+}
 });
 
 svr.Post("/providerCreate", [](const httplib::Request& req, httplib::Response& res){
